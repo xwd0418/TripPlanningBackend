@@ -17,8 +17,8 @@ type Photo struct{
 
 type Place struct{
 	Id string `json:"id"`
-	// Address string `json:"formattedAddress"`
-	// DisplayName Text `json:"DisplayName"`
-	// Reviews []Review `json:"reviews"`
-	// Photos []Photo `json:"photos"`
+	Address string `json:"formattedAddress"`
+	DisplayName Text `json:"DisplayName"`
+	Reviews []Review `json:"reviews"`
+	Photos []Photo `json:"photos"`
 }

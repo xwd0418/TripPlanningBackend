@@ -31,7 +31,7 @@ func SearchPlaces(searchQuery string, maxOutputNum int)  ([]model.Place, error) 
 
     req.Header.Set("Content-Type", "application/json")
     req.Header.Set("X-Goog-Api-Key", constants.GOOGLE_MAP_API_KEY) 
-    req.Header.Set("X-Goog-FieldMask", "places.id")
+    req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.photos,places.reviews")
 
     client := &http.Client{}
     resp, err := client.Do(req)
@@ -49,16 +49,26 @@ func SearchPlaces(searchQuery string, maxOutputNum int)  ([]model.Place, error) 
 
 	fmt.Println(string(body))
 
-	// convert the json to map, and then get the places 
-	var data map[string]interface{}
-	err = json.Unmarshal(body, &data)
-	if err != nil {
-		fmt.Printf("could not unmarshal json: %s\n", err)
-		return nil, err
-	}
+	// convert the json to map, and then get the places objects 
+	// 1. Unmarshal into an interface{}
+    var result map[string]interface{}
+    err = json.Unmarshal(body, &result)
+    if err != nil {
+        log.Fatal(err)
+    }
+	// 2. Extract the sub-JSON (e.g., the "address" part)
+	places, ok := result["places"].([]interface{})
+    if !ok {
+        log.Fatal("Error extracting sub-JSON (list of places)")
+    }
+	// 3. Marshal the sub-JSON back into []byte if needed
+    placesJsonData, err := json.Marshal(places)
+    if err != nil {
+        log.Fatal(err)
+    }
 
 	var searchedPlaces []model.Place
-	err = json.Unmarshal(body, &searchedPlaces)
+	err = json.Unmarshal(placesJsonData, &searchedPlaces)
     if err != nil {
         log.Fatal(err)
     }
