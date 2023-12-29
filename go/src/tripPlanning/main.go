@@ -2,17 +2,13 @@ package main
 
 import (
 	"fmt"
-	"tripPlanning/service"
+	"tripPlanning/backend"
 )
 
-func main() {
-    
-    fmt.Println(string("start"))
-	// service.SearchPlaces("pizza restaurants")
-	json_response, err := service.GetDefaultPlaces(5)
-	if err != nil {
-        fmt.Println("Error sending request: ", err)
-        return 
-    }
-	fmt.Println((json_response))
+func main(){
+	fmt.Println("start service")
+	backend.InitDB()
+	// backend.InitGCSBackend()
+	// log.Fatal(http.ListenAndServe(":8080", handler.InitRouter()))
+
 }
