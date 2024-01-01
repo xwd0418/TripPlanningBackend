@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	jwtMiddleware "github.com/auth0/go-jwt-middleware"
 	// This module lets you authenticate HTTP requests using JWT tokens in your Go Programming Language applications.
@@ -19,6 +20,7 @@ func InitRouter() *mux.Router {
     })
 	router := mux.NewRouter()
 	router.Handle("/showDefaultPlaces", http.HandlerFunc(showDefaultPlacesHandler)).Methods("GET")
+	fmt.Println("ready to receive requests")
 
 	 // when fisrt sign in and sign up, no token authentication
 	 router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")

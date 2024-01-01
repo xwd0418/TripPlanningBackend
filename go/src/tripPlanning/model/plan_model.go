@@ -1,20 +1,18 @@
 package model
 
-type TripPlan  struct{
-	TripPlanId string
-	UserID string 
-	StartDay string
-	EndDay string
-	Transportation string
-	DayPlans []DayPlan
+type TripPlan struct {
+	TripPlanId     string    `json:"-"`
+	UserID         string    `json:"-"`
+	StartDay       string    `json:"StartDay"`
+	EndDay         string    `json:"EndDay"`
+	Transportation string    `json:"Transportation"`
+	DayPlans       []DayPlan `json:"-"`
+	City           string    `json:"City"`
 }
 
-type DayPlan struct{
+type DayPlan struct {
 	TripPlanId string
-	DayPlanID string
+	DayPlanID  string
 	// OrderInTrip int
 	PlacesToVisit []Place
 }
-
-
-
