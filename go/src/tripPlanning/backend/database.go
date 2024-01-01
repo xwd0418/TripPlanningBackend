@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"tripPlanning/constants"
 
@@ -57,7 +58,7 @@ func InitDB() error {
 	return nil
 }
 
-func InsertIntoDB(tableName string, entry map[string]interface{}) error {
+func InsertIntoDB(tableName string, entry map[string]interface{}, additional_query_config ...string) error {
 
 	if len(entry) == 0 {
 		return fmt.Errorf("entry is empty")
@@ -68,21 +69,30 @@ func InsertIntoDB(tableName string, entry map[string]interface{}) error {
 	var placeholders []string
 	var values []interface{}
 
+	counter := 1
 	for k, v := range entry {
 		keys = append(keys, k)
-		placeholders = append(placeholders, "?")
+		placeholders = append(placeholders, "$"+strconv.Itoa(counter))
 		values = append(values, v)
+		counter += 1
 	}
 
-	stmt := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)",
+	suffix := ""
+	if len(additional_query_config) > 0 {
+		suffix = additional_query_config[0]
+	}
+
+	stmt := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s) %s",
 		tableName,
 		strings.Join(keys, ", "),
 		strings.Join(placeholders, ", "),
+		suffix,
 	)
 
 	// Prepare the statement
 	prepStmt, err := db.Prepare(stmt)
 	if err != nil {
+		log.Fatal("db statement prepare failed, statement is ", stmt, err)
 		return err
 	}
 	defer prepStmt.Close()
@@ -98,14 +108,14 @@ func initAllTables() error {
         userID TEXT PRIMARY KEY,
         username TEXT NOT NULL,
 		password TEXT NOT NULL,
-		email TEXT ,
+		email TEXT
     );`
 	_, err = db.Exec(createUserTableSQL)
 	if err != nil {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("User table created successfully")
+	fmt.Println("User table created successfully or already exists")
 
 	// Create Trip table
 	createTripTableSQL := `CREATE TABLE IF NOT EXISTS Trips (
@@ -121,7 +131,7 @@ func initAllTables() error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("Trip table created successfully")
+	fmt.Println("Trip table created successfully or already exists")
 
 	// Create DayPlan table
 	createDayplanTableSQL := `CREATE TABLE IF NOT EXISTS DayPlans (
@@ -134,12 +144,12 @@ func initAllTables() error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("DayPlan table created successfully")
+	fmt.Println("DayPlan table created successfully or already exists")
 
 	// Create DayPlaceRelation table
 	createDayPlaceRelationsTableSQL := `CREATE TABLE IF NOT EXISTS DayPlaceRelations (
         placeID TEXT PRIMARY KEY,
-        dayPlanID TEXT REFERENCES DayPlan(dayPlanID),
+        dayPlanID TEXT REFERENCES DayPlans(dayPlanID),
 		visitOrder INT
     );`
 	_, err = db.Exec(createDayPlaceRelationsTableSQL)
@@ -147,7 +157,7 @@ func initAllTables() error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("DayPlaceRelation table created successfully")
+	fmt.Println("DayPlaceRelation table created successfully or already exists")
 
 	// Create placeDetails table
 	createPlaceDetailsTableSQL := `CREATE TABLE IF NOT EXISTS PlaceDetails (
@@ -162,7 +172,7 @@ func initAllTables() error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("PlaceDetails table created successfully")
+	fmt.Println("PlaceDetails table created successfully or already exists")
 
 	// Create Reviews table
 	createReviewsTableSQL := `CREATE TABLE IF NOT EXISTS Reviews (
@@ -178,7 +188,7 @@ func initAllTables() error {
 		log.Fatal(err)
 		return err
 	}
-	fmt.Println("PlaceDetails table created successfully")
+	fmt.Println("PlaceDetails table created successfully or already exists")
 
 	return nil
 }

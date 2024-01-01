@@ -71,7 +71,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 			if !placeIsInDB {
 				err = savePlaceToDB(place)
 				if err != nil {
-					log.Fatal("Error during store new trip plan: ", err)
+					log.Fatal("Error during store new trip place: ", err)
 					return err
 				}
 			}
@@ -104,15 +104,15 @@ func savePlaceToDB(place model.Place) error {
 	}
 	placeEntry := map[string]interface{}{
 		"placeID":   place.Id,
-		"name":      place.DisplayName,
+		"name":      place.DisplayName.Text,
 		"address":   place.Address,
-		"placeType": place.PlaceType,
+		"placeType": place.PlaceType.Text,
 		"photoURLs": strings.Join(photoURLs, "$$"),
 	}
 
 	err := backend.InsertIntoDB(backend.TableName_PlaceDetails, placeEntry)
 	if err != nil {
-		log.Fatal("Error during store new place: ", err)
+		log.Println("Error during store new place: ", err)
 		return err
 	}
 	// save reviews of this place

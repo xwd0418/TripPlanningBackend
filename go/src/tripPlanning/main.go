@@ -8,7 +8,7 @@ import (
 	"tripPlanning/handler"
 )
 
-func main(){
+func main() {
 	fmt.Println("start service")
 	backend.InitDB()
 	// backend.InitGCSBackend()
