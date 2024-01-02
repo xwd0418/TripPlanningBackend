@@ -92,7 +92,7 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 	// Prepare the statement
 	prepStmt, err := db.Prepare(stmt)
 	if err != nil {
-		log.Fatal("db statement prepare failed, statement is ", stmt, err)
+		log.Println("db statement prepare failed, statement is ", stmt, err)
 		return err
 	}
 	defer prepStmt.Close()
@@ -100,6 +100,28 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 	// Execute the statement
 	_, err = prepStmt.Exec(values...)
 	return err
+}
+
+func ReadFromDB(tableName string, columns_to_read []string) (*sql.Rows, error) {
+	queryStatement := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columns_to_read, ", "), tableName)
+	rows, err := db.Query(queryStatement)
+	if err != nil {
+		log.Println("Query fails: ", err)
+		return nil, err
+	}
+	return rows, nil
+}
+
+// CheckIfItemExistsInDB checks if an item exists in a specified column in a table
+func CheckIfItemExistsInDB(tableName string, columnName string, itemValue interface{}) (bool, error) {
+	var exists bool
+	query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = ?)", tableName, columnName)
+
+	err := db.QueryRow(query, itemValue).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
 }
 
 func initAllTables() error {

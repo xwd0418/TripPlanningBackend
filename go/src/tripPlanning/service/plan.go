@@ -58,7 +58,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 		}
 		err = backend.InsertIntoDB(backend.TableName_DayPlans, tripTableEntry)
 		if err != nil {
-			log.Fatal("Error during store new day-plan: ", err)
+			log.Println("Error during store new day-plan: ", err)
 			return err
 		}
 
@@ -66,8 +66,11 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 		for visitOrder, place := range planedRoute {
 			// 3.2.1 save the place detail if necessary
 			placeID := place.Id
-			// TODO: check if the placeID is already in DB, if not then save it to DB
-			placeIsInDB := false
+			placeIsInDB, err := backend.CheckIfItemExistsInDB(backend.TableName_PlaceDetails, "placeID", placeID)
+			if err != nil {
+				log.Println("Error during checking if place ID already exists: ", err)
+				return err
+			}
 			if !placeIsInDB {
 				err = savePlaceToDB(place)
 				if err != nil {
