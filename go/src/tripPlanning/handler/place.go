@@ -12,7 +12,7 @@ func showDefaultPlacesHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received one request for search")
 	w.Header().Set("Content-Type", "application/json")
 
-	// 1. process request => struct
+	// 1. process request
 	max_num_display_str := r.URL.Query().Get("max_num_display")
 	// 2. call services to handle request
 	max_num_display, err := strconv.Atoi(max_num_display_str)

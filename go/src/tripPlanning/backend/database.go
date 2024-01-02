@@ -102,11 +102,14 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 	return err
 }
 
-func ReadFromDB(tableName string, columns_to_read []string) (*sql.Rows, error) {
+func ReadFromDB(tableName string, columns_to_read []string, conditions string) (*sql.Rows, error) {
 	queryStatement := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columns_to_read, ", "), tableName)
+	if conditions != "" {
+		queryStatement += " WHERE " + conditions
+	}
 	rows, err := db.Query(queryStatement)
 	if err != nil {
-		log.Println("Query fails: ", err)
+		log.Println("Query "+queryStatement+"fails: ", err)
 		return nil, err
 	}
 	return rows, nil
