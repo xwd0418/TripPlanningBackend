@@ -5,21 +5,14 @@ package service
 
 import (
 	"fmt"
-	"log"
-	"reflect"
 
-	"database/sql"
 	"tripPlanning/backend"
-	"tripPlanning/constants"
 	"tripPlanning/model"
-
-	"github.com/olivere/elastic/v7"
-	// "github.com/olivere/elastic/v7"
 )
 
 func AddUser(user *model.User) (bool, error) {
     // Check if the username already exists
-    existingUser, err := backend.service.GetUser(user.Username)
+    existingUser, err := backend.GetUser(user.Username)
     if err != nil {
         return false, fmt.Errorf("error checking for existing user: %v", err)
     }
@@ -28,7 +21,7 @@ func AddUser(user *model.User) (bool, error) {
     }
 
     // Save the new user
-    err = backend.service.SaveUser(user)
+    err = backend.SaveUser(user)
     if err != nil {
         return false, fmt.Errorf("error saving new user: %v", err)
     }
@@ -37,16 +30,23 @@ func AddUser(user *model.User) (bool, error) {
     return true, nil
 }
 
-// method 1: search ES using username then compare password
-// method 2: search ES using username + passowrd, totalhits() > -> success
+
 func CheckUser(username, password string) (bool, error) { //Checkuser
-    query := elastic.NewBoolQuery() // Creates a new bool query.
-    query.Must(elastic.NewTermQuery("username", username)) // must contain this username
-    query.Must(elastic.NewTermQuery("password", password)) // must contain this password
-    searchResult, err := backend.ESBackend.ReadFromES(query, constants.USER_INDEX)
+    user, err := backend.GetUser(username)
     if err != nil {
-        return false, err
+        return false, fmt.Errorf("error retrieving user: %v", err)
     }
-    return false, nil
+    if user == nil {
+        return false, fmt.Errorf("username '%s' does not exist", username)
+    }
+
+    // Check if the provided password matches
+    // Assuming passwords are stored in plain text (replace this with your actual comparison logic)
+    if user.Password != password {
+        return false, fmt.Errorf("incorrect password for username '%s'", username)
+    }
+
+    // User is authorized
+    return true, nil
 }
 

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"tripPlanning/constants"
 
-    "tripPlanning/model"
+	"tripPlanning/model"
 
 	_ "github.com/lib/pq"
 )
@@ -195,15 +195,17 @@ func initAllTables() error {
 	return nil
 }
 
-type DatabaseService struct {
-    DB *sql.DB
-}
+// var (DBbackend *DatabaseService)
 
-// 
-func (service *DatabaseService) GetUser(username string) (*model.User, error) {
+// type DatabaseService struct {
+//     DB *sql.DB
+// }
+
+// (service *DatabaseService)
+func GetUser(username string) (*model.User, error) {
     var user model.User
-    query := `SELECT id, username, password FROM users WHERE username = $1`
-    err := service.DB.QueryRow(query, username).Scan(&user.Id, &user.Username, &user.Password)
+    query := `SELECT userID, username, password FROM Users WHERE username = $1`
+    err := db.QueryRow(query, username).Scan(&user.Id, &user.Username, &user.Password)
     if err != nil {
         if err == sql.ErrNoRows {
             return nil, nil // No user found
@@ -214,11 +216,12 @@ func (service *DatabaseService) GetUser(username string) (*model.User, error) {
 }
 
 // SaveNewUser saves a new user with the given username to the database
-func (service *DatabaseService) SaveUser(user *model.User) error {
+//  (service *DatabaseService)
+func SaveUser(user *model.User) error {
     // SQL statement to insert a new user
-    query := `INSERT INTO users (username, password) VALUES ($1, $2)`
+    query := `INSERT INTO Users (username, password, userID, email) VALUES ($1, $2, $3, $4)`
     
-    _, err := service.DB.Exec(query, user.Username, user.Password)
+    _, err := db.Exec(query, user.Username, user.Password, user.Id, user.Email)
     if err != nil {
         return fmt.Errorf("error saving user: %w", err)
     }
