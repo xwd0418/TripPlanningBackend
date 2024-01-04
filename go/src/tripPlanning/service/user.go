@@ -8,6 +8,8 @@ import (
 
 	"tripPlanning/backend"
 	"tripPlanning/model"
+
+	"github.com/google/uuid"
 )
 
 func AddUser(user *model.User) (bool, error) {
@@ -21,6 +23,8 @@ func AddUser(user *model.User) (bool, error) {
     }
 
     // Save the new user
+    //TODO: generate id 
+    user.Id = uuid.New().String()
     err = backend.SaveUser(user)
     if err != nil {
         return false, fmt.Errorf("error saving new user: %v", err)
@@ -41,7 +45,8 @@ func CheckUser(username, password string) (bool, error) { //Checkuser
     }
 
     // Check if the provided password matches
-    // Assuming passwords are stored in plain text (replace this with your actual comparison logic)
+    // Assuming passwords are stored in plain text 
+    // TODO: encode password
     if user.Password != password {
         return false, fmt.Errorf("incorrect password for username '%s'", username)
     }

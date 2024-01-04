@@ -220,13 +220,7 @@ func initAllTables() error {
 	return nil
 }
 
-// var (DBbackend *DatabaseService)
-
-// type DatabaseService struct {
-//     DB *sql.DB
-// }
-
-// (service *DatabaseService)
+// F=GetUser returns model.User object from table Users with given username
 func GetUser(username string) (*model.User, error) {
     var user model.User
     query := `SELECT userID, username, password FROM Users WHERE username = $1`
@@ -240,8 +234,7 @@ func GetUser(username string) (*model.User, error) {
     return &user, nil
 }
 
-// SaveNewUser saves a new user with the given username to the database
-//  (service *DatabaseService)
+// SaveUser saves a new user to table Users
 func SaveUser(user *model.User) error {
     // SQL statement to insert a new user
     query := `INSERT INTO Users (username, password, userID, email) VALUES ($1, $2, $3, $4)`
