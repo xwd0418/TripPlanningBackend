@@ -15,8 +15,8 @@ import (
 
 var mySigningKey = []byte("secret")
 
-// using input username and password to check if user exists, if exists then generate token and return token to client
-func signinHandler(w http.ResponseWriter, r *http.Request) {
+// using input username and password to check if user exists and signin successful, if successful then generate token and return token to client
+func loginHandler(w http.ResponseWriter, r *http.Request) {
     fmt.Println("Received one signin request")
     w.Header().Set("Content-Type", "text/plain")
 	// Set sets the header entries associated with key to the single element value. 

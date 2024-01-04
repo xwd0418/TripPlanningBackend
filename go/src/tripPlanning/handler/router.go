@@ -26,7 +26,7 @@ func InitRouter() *mux.Router {
 
 	 // when fisrt sign in and sign up, no token authentication
 	 router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")
-	 router.Handle("/signin", http.HandlerFunc(signinHandler)).Methods("POST")
+	 router.Handle("/login", http.HandlerFunc(loginHandler)).Methods("POST")
 	 
 	return router
 }
