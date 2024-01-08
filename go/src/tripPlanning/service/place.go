@@ -31,7 +31,8 @@ func SearchPlaces(searchQuery string, maxOutputNum int) ([]model.Place, error) {
 
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("X-Goog-Api-Key", constants.GOOGLE_MAP_API_KEY)
-	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.photos,places.reviews")
+	req.Header.Set("X-Goog-FieldMask", "places.id,places.displayName,places.primaryTypeDisplayName,places.formattedAddress,places.location,places.photos,places.reviews")
+	// req.Header.Set("X-Goog-FieldMask", "places.location")
 
 	client := &http.Client{}
 	resp, err := client.Do(req)

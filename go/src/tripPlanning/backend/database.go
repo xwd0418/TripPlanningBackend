@@ -190,7 +190,9 @@ func initAllTables() error {
         name TEXT NOT NULL,
 		address TEXT NOT NULL,
 		placeType TEXT,
-		photoURLs TEXT
+		photoURLs TEXT,
+		longitude DECIMAL,
+		latitude DECIMAL
     );`
 	_, err = db.Exec(createPlaceDetailsTableSQL)
 	if err != nil {

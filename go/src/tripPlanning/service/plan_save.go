@@ -125,6 +125,8 @@ func savePlaceToDB(place model.Place) error {
 			"rating":      review.Rating,
 			"publishTime": review.PublishTime,
 			"placeID":     place.Id,
+			"longitude":   place.Location.Longitude,
+			"latitude":    place.Location.Latitude,
 		}
 		err = backend.InsertIntoDB(backend.TableName_Reviews, reviewEntry)
 		if err != nil {
