@@ -12,6 +12,8 @@ import (
 	"strings"
 	"tripPlanning/constants"
 
+	"tripPlanning/model"
+
 	_ "github.com/lib/pq"
 )
 
@@ -219,3 +221,32 @@ func initAllTables() error {
 
 	return nil
 }
+
+// F=GetUser returns model.User object from table Users with given username
+func GetUser(username string) (*model.User, error) {
+    var user model.User
+    query := `SELECT userID, username, password FROM Users WHERE username = $1`
+    err := db.QueryRow(query, username).Scan(&user.Id, &user.Username, &user.Password)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return nil, nil // No user found
+        }
+        return nil, fmt.Errorf("error querying user: %w", err)
+    }
+    return &user, nil
+}
+
+// SaveUser saves a new user to table Users
+func SaveUser(user *model.User) error {
+    // SQL statement to insert a new user
+    query := `INSERT INTO Users (username, password, userID, email) VALUES ($1, $2, $3, $4)`
+    
+    _, err := db.Exec(query, user.Username, user.Password, user.Id, user.Email)
+    if err != nil {
+        return fmt.Errorf("error saving user: %w", err)
+    }
+
+    return nil
+}
+
+
