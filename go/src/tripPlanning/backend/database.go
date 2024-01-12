@@ -168,7 +168,7 @@ func initAllTables() error {
     );`
 	_, err = db.Exec(createDayplanTableSQL)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err)     
 		return err
 	}
 	fmt.Println("DayPlan table created successfully or already exists")
