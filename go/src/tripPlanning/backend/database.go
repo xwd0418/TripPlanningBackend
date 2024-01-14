@@ -104,6 +104,10 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 	return err
 }
 
+func ReadRowFromDB(query string) *sql.Row {
+	return db.QueryRow(query)
+}
+
 func ReadFromDB(tableName string, columns_to_read []string, conditions string) (*sql.Rows, error) {
 	queryStatement := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columns_to_read, ", "), tableName)
 	if conditions != "" {
@@ -224,29 +228,27 @@ func initAllTables() error {
 
 // F=GetUser returns model.User object from table Users with given username
 func GetUser(username string) (*model.User, error) {
-    var user model.User
-    query := `SELECT userID, username, password FROM Users WHERE username = $1`
-    err := db.QueryRow(query, username).Scan(&user.Id, &user.Username, &user.Password)
-    if err != nil {
-        if err == sql.ErrNoRows {
-            return nil, nil // No user found
-        }
-        return nil, fmt.Errorf("error querying user: %w", err)
-    }
-    return &user, nil
+	var user model.User
+	query := `SELECT userID, username, password FROM Users WHERE username = $1`
+	err := db.QueryRow(query, username).Scan(&user.Id, &user.Username, &user.Password)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil // No user found
+		}
+		return nil, fmt.Errorf("error querying user: %w", err)
+	}
+	return &user, nil
 }
 
 // SaveUser saves a new user to table Users
 func SaveUser(user *model.User) error {
-    // SQL statement to insert a new user
-    query := `INSERT INTO Users (username, password, userID, email) VALUES ($1, $2, $3, $4)`
-    
-    _, err := db.Exec(query, user.Username, user.Password, user.Id, user.Email)
-    if err != nil {
-        return fmt.Errorf("error saving user: %w", err)
-    }
+	// SQL statement to insert a new user
+	query := `INSERT INTO Users (username, password, userID, email) VALUES ($1, $2, $3, $4)`
 
-    return nil
+	_, err := db.Exec(query, user.Username, user.Password, user.Id, user.Email)
+	if err != nil {
+		return fmt.Errorf("error saving user: %w", err)
+	}
+
+	return nil
 }
-
-
