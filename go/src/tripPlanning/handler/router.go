@@ -13,6 +13,10 @@ func InitRouter() *mux.Router {
 
 	//savePlaces could be a "put" OR potentially a "post" request
 	router.Handle("/savePlace", http.HandleFunc(saveHandler)).Methods("PUT")
+
+	// New delete route for a trip
+    router.Handle("/deleteTrip/{tripID}", http.HandlerFunc(deleteTripHandler)).Methods("DELETE")
+	
 	fmt.Println("ready to receive requests")
 	return router
 }
