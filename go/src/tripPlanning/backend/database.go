@@ -252,3 +252,26 @@ func SaveUser(user *model.User) error {
 
 	return nil
 }
+
+// DeleteFromDB 
+func DeleteFromDB(tableName, conditionColumn string, conditionValue interface{}) error {
+	// Build the SQL statement
+	stmt := fmt.Sprintf("DELETE FROM %s WHERE %s = $1", tableName, conditionColumn)
+
+	// Prepare the statement
+	prepStmt, err := db.Prepare(stmt)
+	if err != nil {
+		log.Println("DB statement prepare failed, statement is ", stmt, err)
+		return err
+	}
+	defer prepStmt.Close()
+
+	// Execute the statement
+	_, err = prepStmt.Exec(conditionValue)
+	if err != nil {
+		log.Println("Error deleting from table", tableName, ":", err)
+		return err
+	}
+
+	return nil
+}
