@@ -12,7 +12,7 @@ func TestLoadPlacesFromDB(t *testing.T) {
 
 	backend.InitDB()
 
-	dayPlans, err := service.ReadAllDayPlansOfTripPlan(`'9b138350-ae23-4401-b3c9-d7489c54cef5'`)
+	dayPlans, err := service.ReadAllDayPlansOfTripPlan(`'87e51db2-0f14-4962-a56b-b44c3048732a'`)
 	if err != nil {
 		panic(" ReadAllDayPlansOfTripPlan failed ")
 	}

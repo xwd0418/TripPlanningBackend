@@ -6,7 +6,6 @@
 package service
 
 import (
-	
 	"log"
 	"strings"
 	"tripPlanning/backend"
@@ -47,7 +46,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 		}
 		plannedRoutes = append(plannedRoutes, sortedPlaces)
 	}
-
+	log.Printf("size of plannedRoutes is %d, %d", len(plannedRoutes), len(plannedRoutes[0]))
 	// 3. save planned routes to db
 	for dayOrder, planedRoute := range plannedRoutes {
 		// 3.1 save each dayPlan to DB
@@ -58,11 +57,12 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 			"dayOrder":  dayOrder + 1,
 		}
 		err = backend.InsertIntoDB(backend.TableName_DayPlans, tripTableEntry)
+
 		if err != nil {
 			log.Println("Error during store new day-plan: ", err)
 			return "", err
 		}
-
+		// log.Printf("save to db dayplans with day_id %s tripID %s, order %d", currentDayPlanId, tripID, dayOrder+1)
 		// 3.2 save each places of the day
 		for visitOrder, place := range planedRoute {
 			// 3.2.1 save the place detail if necessary
@@ -73,7 +73,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 				return "", err
 			}
 			if !placeIsInDB {
-				err = savePlaceToDB(place)
+				err = SavePlaceToDB(place)
 				if err != nil {
 					log.Fatal("Error during store new trip place: ", err)
 					return "", err
@@ -95,7 +95,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 	return tripID, nil
 }
 
-func savePlaceToDB(place model.Place) error {
+func SavePlaceToDB(place model.Place) error {
 	// save place
 	var photoURLs []string
 	for _, p := range place.Photos {
@@ -107,6 +107,8 @@ func savePlaceToDB(place model.Place) error {
 		"address":   place.Address,
 		"placeType": place.PlaceType.Text,
 		"photoURLs": strings.Join(photoURLs, "$$"),
+		"longitude": place.Location.Longitude,
+		"latitude":  place.Location.Latitude,
 	}
 
 	err := backend.InsertIntoDB(backend.TableName_PlaceDetails, placeEntry)
@@ -122,8 +124,6 @@ func savePlaceToDB(place model.Place) error {
 			"rating":      review.Rating,
 			"publishTime": review.PublishTime,
 			"placeID":     place.Id,
-			"longitude":   place.Location.Longitude,
-			"latitude":    place.Location.Latitude,
 		}
 		err = backend.InsertIntoDB(backend.TableName_Reviews, reviewEntry)
 		if err != nil {

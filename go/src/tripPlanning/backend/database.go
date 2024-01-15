@@ -113,6 +113,7 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 	if conditions != "" {
 		queryStatement += " WHERE " + conditions
 	}
+	log.Printf("query statement is %s", queryStatement)
 	rows, err := db.Query(queryStatement)
 	if err != nil {
 		log.Println("Query "+queryStatement+"fails: ", err)
@@ -124,10 +125,11 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 // CheckIfItemExistsInDB checks if an item exists in a specified column in a table
 func CheckIfItemExistsInDB(tableName string, columnName string, itemValue interface{}) (bool, error) {
 	var exists bool
-	query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = ?)", tableName, columnName)
-
+	query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = $1)", tableName, columnName)
+	// log.Printf("check duplicated place query is %s", query)
 	err := db.QueryRow(query, itemValue).Scan(&exists)
 	if err != nil {
+		log.Printf("error of query row during checking duplicated places %v", err)
 		return false, err
 	}
 	return exists, nil
@@ -253,7 +255,7 @@ func SaveUser(user *model.User) error {
 	return nil
 }
 
-// DeleteFromDB 
+// DeleteFromDB
 func DeleteFromDB(tableName, conditionColumn string, conditionValue interface{}) error {
 	// Build the SQL statement
 	stmt := fmt.Sprintf("DELETE FROM %s WHERE %s = $1", tableName, conditionColumn)

@@ -15,25 +15,25 @@ import (
 
 func InitRouter() *mux.Router {
 	// jwtMiddleware := jwtMiddleware.New(jwtMiddleware.Options{
-    //     ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-    //         return []byte(mySigningKey), nil
-    //     },
-    //     SigningMethod: jwt.SigningMethodHS256,
-    // })
+	//     ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+	//         return []byte(mySigningKey), nil
+	//     },
+	//     SigningMethod: jwt.SigningMethodHS256,
+	// })
 	router := mux.NewRouter()
 	router.Handle("/showDefaultPlaces", http.HandlerFunc(showDefaultPlacesHandler)).Methods("GET")
 
 	//savePlaces could be a "put" OR potentially a "post" request
-	router.Handle("/savePlace", http.HandleFunc(saveHandler)).Methods("PUT")
+	// router.Handle("/savePlace", http.HandleFunc(saveHandler)).Methods("PUT")
 
 	// New delete route for a trip
-    router.Handle("/deleteTrip/{tripID}", http.HandlerFunc(deleteTripHandler)).Methods("DELETE")
-	
+	// router.Handle("/deleteTrip/{tripID}", http.HandlerFunc(deleteTripHandler)).Methods("DELETE")
+
 	fmt.Println("ready to receive requests")
 
-	 // when fisrt sign in and sign up, no token authentication
-	 router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")
-	 router.Handle("/login", http.HandlerFunc(loginHandler)).Methods("POST")
-	 
+	// when fisrt sign in and sign up, no token authentication
+	router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")
+	router.Handle("/login", http.HandlerFunc(loginHandler)).Methods("POST")
+
 	return router
 }

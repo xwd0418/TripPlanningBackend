@@ -7,7 +7,7 @@ type TripPlan struct {
 	StartDay       string    `json:"StartDay"`
 	EndDay         string    `json:"EndDay"`
 	Transportation string    `json:"Transportation"`
-	DayPlans       []DayPlan `json:"DayPlans"`
+	DayPlans       []DayPlan `json:"-"`
 	City           string    `json:"City"`
 }
 

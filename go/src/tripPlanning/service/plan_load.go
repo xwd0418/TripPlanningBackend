@@ -29,7 +29,7 @@ func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
 func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
 	rows, err := backend.ReadFromDB(backend.TableName_Trips,
-		[]string{"tripname", "startday", "endday", "transportation"},
+		[]string{"tripID", "tripname", "startday", "endday", "transportation"},
 		fmt.Sprintf("userid=%s", userID))
 	if err != nil {
 		log.Println("Error during reading all plans' overview: ", err)
@@ -39,7 +39,7 @@ func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
 	var tripPlans []model.TripPlan
 	for rows.Next() {
 		var p model.TripPlan
-		if err := rows.Scan(&p.TripName, &p.StartDay, &p.EndDay, &p.Transportation); err != nil {
+		if err := rows.Scan(&p.TripPlanId, &p.TripName, &p.StartDay, &p.EndDay, &p.Transportation); err != nil {
 			return nil, err
 		}
 		tripPlans = append(tripPlans, p)
@@ -90,7 +90,7 @@ func ReadAllDayPlansOfTripPlan(tripID string) ([]model.DayPlan, error) {
 		dayPlan.Transportation = transportation
 		dayPlan.Date = current_date.Format(date_format_layout)
 		current_date = current_date.Add(24 * time.Hour)
-		// log.Printf("cu")
+		log.Printf("day id is %s", day.ID)
 		dayPlan.PlacesToVisit, err = getPlacesOfDay(day.ID)
 		if err != nil {
 			log.Println("Error during getting places details from a place id ", err)
@@ -98,6 +98,7 @@ func ReadAllDayPlansOfTripPlan(tripID string) ([]model.DayPlan, error) {
 		}
 		dayPlans = append(dayPlans, dayPlan)
 	}
+
 	return dayPlans, nil
 }
 
@@ -118,6 +119,7 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 			return nil, err
 		}
 		placesWithOrder = append(placesWithOrder, day_place_relation_datum)
+		// log.Printf("current place is %s", day_place_relation_datum.ID)
 	}
 	sort.Sort(byID(placesWithOrder))
 
