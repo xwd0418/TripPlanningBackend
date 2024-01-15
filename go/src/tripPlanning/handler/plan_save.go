@@ -45,6 +45,7 @@ func GeneratePlanAndSaveHandler(w http.ResponseWriter, r *http.Request) {
 	// Send a response back to the client.
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, tripID)
+	w.Write([]byte(tripID))
+	// fmt.Fprintln(w, tripID)
 	fmt.Fprintln(w, "GeneratePlanAndSave request processed successfully.")
 }

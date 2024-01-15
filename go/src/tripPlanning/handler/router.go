@@ -20,8 +20,20 @@ func InitRouter() *mux.Router {
 	//     },
 	//     SigningMethod: jwt.SigningMethodHS256,
 	// })
+
 	router := mux.NewRouter()
+
+	// places routing
 	router.Handle("/showDefaultPlaces", http.HandlerFunc(showDefaultPlacesHandler)).Methods("GET")
+	router.Handle("/searchPlaces ", http.HandlerFunc(searchPlacesPlacesHandler)).Methods("GET")
+
+	//  DB loading routing
+	router.Handle("/getAllPlansOfUser", http.HandlerFunc(readUserGeneralTripsHandler)).Methods("GET")
+	router.Handle("/getTripInfo ", http.HandlerFunc(readAllDayPlansOfTripPlanHandler)).Methods("GET")
+
+	// DB saving routing
+	router.Handle("/getTripInfo ", http.HandlerFunc(readAllDayPlansOfTripPlanHandler)).Methods("POST")
+	// NEED CHANGE: HOW TO SEND INPUT AS JSON 
 
 	//savePlaces could be a "put" OR potentially a "post" request
 	// router.Handle("/savePlace", http.HandleFunc(saveHandler)).Methods("PUT")
