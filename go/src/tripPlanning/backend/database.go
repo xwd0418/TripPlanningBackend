@@ -105,6 +105,7 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 }
 
 func ReadRowFromDB(query string) *sql.Row {
+	log.Printf("Row query statement is %s", query)
 	return db.QueryRow(query)
 }
 
@@ -179,19 +180,6 @@ func initAllTables() error {
 	}
 	fmt.Println("DayPlan table created successfully or already exists")
 
-	// Create DayPlaceRelation table
-	createDayPlaceRelationsTableSQL := `CREATE TABLE IF NOT EXISTS DayPlaceRelations (
-        placeID TEXT PRIMARY KEY,
-        dayPlanID TEXT REFERENCES DayPlans(dayPlanID),
-		visitOrder INT
-    );`
-	_, err = db.Exec(createDayPlaceRelationsTableSQL)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	fmt.Println("DayPlaceRelation table created successfully or already exists")
-
 	// Create placeDetails table
 	createPlaceDetailsTableSQL := `CREATE TABLE IF NOT EXISTS PlaceDetails (
         placeID TEXT PRIMARY KEY,
@@ -208,6 +196,20 @@ func initAllTables() error {
 		return err
 	}
 	fmt.Println("PlaceDetails table created successfully or already exists")
+
+	// Create DayPlaceRelation table
+	createDayPlaceRelationsTableSQL := `CREATE TABLE IF NOT EXISTS DayPlaceRelations (
+        placeID TEXT REFERENCES PlaceDetails(placeID),
+        dayPlanID TEXT REFERENCES DayPlans(dayPlanID),
+		visitOrder INT,
+		PRIMARY KEY (placeID, dayPlanID)
+    );`
+	_, err = db.Exec(createDayPlaceRelationsTableSQL)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	fmt.Println("DayPlaceRelation table created successfully or already exists")
 
 	// Create Reviews table
 	createReviewsTableSQL := `CREATE TABLE IF NOT EXISTS Reviews (

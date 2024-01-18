@@ -30,7 +30,7 @@ func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
 	rows, err := backend.ReadFromDB(backend.TableName_Trips,
 		[]string{"tripID", "tripname", "startday", "endday", "transportation"},
-		fmt.Sprintf("userid=%s", userID))
+		fmt.Sprintf("userid='%s'", userID))
 	if err != nil {
 		log.Println("Error during reading all plans' overview: ", err)
 		return nil, err
@@ -54,11 +54,11 @@ func ReadAllDayPlansOfTripPlan(tripID string) ([]model.DayPlan, error) {
 
 	// get transportation and start_day
 	var transportation, start_day string
-	sql_row_query := fmt.Sprintf("SELECT transportation, startDay FROM Trips WHERE tripID = %s", tripID)
+	sql_row_query := fmt.Sprintf("SELECT transportation, startDay FROM Trips WHERE tripID = '%s'", tripID)
 	backend.ReadRowFromDB(sql_row_query).Scan(&transportation, &start_day)
 
 	// get all day_plan ID with their order
-	rows, err := backend.ReadFromDB(backend.TableName_DayPlans, []string{"dayPlanID", "dayOrder"}, fmt.Sprintf("tripID=%s", tripID))
+	rows, err := backend.ReadFromDB(backend.TableName_DayPlans, []string{"dayPlanID", "dayOrder"}, fmt.Sprintf("tripID='%s'", tripID))
 
 	if err != nil {
 		log.Println("Error during reading all day_plans' overview: ", err)
@@ -113,11 +113,14 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 	defer rows.Close()
 	//  sort based on visited order
 	var placesWithOrder []idWithOder
+
+	// log.Printf("day id is %s ", dayID)
 	for rows.Next() {
 		var day_place_relation_datum idWithOder
 		if err := rows.Scan(&day_place_relation_datum.ID, &day_place_relation_datum.order); err != nil {
 			return nil, err
 		}
+		// log.Printf("place id is %s and order is %d", day_place_relation_datum.ID, day_place_relation_datum.order)
 		placesWithOrder = append(placesWithOrder, day_place_relation_datum)
 		// log.Printf("current place is %s", day_place_relation_datum.ID)
 	}
@@ -126,10 +129,11 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 	// place should inlude place_id, lat, long
 	var detailedPlaces []model.Place
 	for _, place := range placesWithOrder {
+		// log.Println("place id", place.ID)
 		var detailedPlace model.Place
 		detailedPlace.Id = place.ID
-		location_query := fmt.Sprintf("SELECT name, longitude, latitude FROM PlaceDetails WHERE placeID = %s", place.ID)
-		backend.ReadRowFromDB(location_query).Scan(&detailedPlace.DisplayName, &detailedPlace.Location.Longitude, &detailedPlace.Location.Latitude)
+		location_query := fmt.Sprintf("SELECT name, longitude, latitude FROM PlaceDetails WHERE placeID = '%s'", place.ID)
+		backend.ReadRowFromDB(location_query).Scan(&detailedPlace.DisplayName.Text, &detailedPlace.Location.Longitude, &detailedPlace.Location.Latitude)
 		detailedPlaces = append(detailedPlaces, detailedPlace)
 	}
 	return detailedPlaces, nil

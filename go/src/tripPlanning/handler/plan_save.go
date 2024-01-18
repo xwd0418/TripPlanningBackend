@@ -14,7 +14,7 @@ type RequestData struct {
 	UserID          string          `json:"user_id"`
 	StartDay        string          `json:"start_day"`
 	EndDay          string          `json:"end_day"`
-	PlacesOfEachDay [][]model.Place `json:"place_ids_of_each_day"`
+	PlacesOfEachDay [][]model.Place `json:"place_of_each_day"`
 	Transportation  string          `json:"transportation"`
 	TripName        string          `json:"trip_name"`
 }
