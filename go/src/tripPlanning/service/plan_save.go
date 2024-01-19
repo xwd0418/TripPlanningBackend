@@ -6,6 +6,7 @@
 package service
 
 import (
+	// "fmt"
 	"log"
 	"strings"
 	"tripPlanning/backend"
