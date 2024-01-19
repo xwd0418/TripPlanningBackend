@@ -23,7 +23,7 @@ func AddUser(user *model.User) (bool, error) {
     }
 
     // Save the new user
-    //TODO: generate id 
+    // generate id 
     user.Id = uuid.New().String()
     err = backend.SaveUser(user)
     if err != nil {

@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"math"
+	// "math"
 	"net/http"
 	"net/url"
 	"strings"
@@ -18,7 +18,7 @@ import (
 	"tripPlanning/model"
 )
 
-func GenerateDayPlan(places []model.Place, transportation string, date string) ([]model.Place, error) {
+func  GenerateDayPlan(places []model.Place, transportation string, date string) ([]model.Place, error) {
 	// Step 1: Create a matrix of distances between all places
     distanceMatrix, err := GetDistanceMatrix(places, transportation)
     if err != nil {
@@ -57,6 +57,9 @@ func GetDistanceMatrix(places []model.Place, transportation string) ([][]int, er
         transportation,
         constants.GOOGLE_MAP_API_KEY)
 
+    // // Log the full API request URL for debugging
+    // fmt.Println("API Request URL:", apiUrl)
+
     // Make the request
     resp, err := http.Get(apiUrl)
     if err != nil {
@@ -71,7 +74,7 @@ func GetDistanceMatrix(places []model.Place, transportation string) ([][]int, er
     }
 
     // Print the raw JSON response
-    fmt.Println("Raw JSON response:", string(body))
+    // fmt.Println("Raw JSON response:", string(body))
 
 	var matrixResponse model.DistanceMatrixResponse
     if err := json.Unmarshal(body, &matrixResponse); err != nil {
@@ -111,69 +114,103 @@ func GetDistanceMatrix(places []model.Place, transportation string) ([][]int, er
         }
     }
     
+    // fmt.Println("distanceMatrix", distanceMatrix)
     return distanceMatrix, nil
 }
 
-// Function to find the shortest route
-func FindShortestRoute(matrix [][]int) ([]int, error) {
-    n := len(matrix)
-    if n == 0 {
-        return nil, errors.New("distance matrix is empty")
-    }
+// find shortest route using Nearest Neighbor algorithm 
+func FindShortestRoute(distanceMatrix [][]int) ([]int, error) {
+    numCities := len(distanceMatrix)
+    visited := make([]bool, numCities)
+    path := make([]int, 0, numCities)
 
-    // Create a slice of destination indices
-    destinations := make([]int, n)
-    for i := range destinations {
-        destinations[i] = i
-    }
+    currentCity := 0
+    visited[currentCity] = true
+    path = append(path, currentCity)
 
-    // Generate all permutations of destinations
-    permutations := permute(destinations)
+    for len(path) < numCities {
+        nearestCity := -1
+        nearestDistance := int(^uint(0) >> 1) // Max Int value
 
-    minDistance := math.MaxInt32
-    var shortestRoute []int
+        for city := 0; city < numCities; city++ {
+            if !visited[city] && distanceMatrix[currentCity][city] < nearestDistance {
+                nearestCity = city
+                nearestDistance = distanceMatrix[currentCity][city]
+            }
+        }
 
-    // Iterate over all permutations to find the shortest route
-    for _, perm := range permutations {
-        distance := calculateDistance(perm, matrix)
-        if distance < minDistance {
-            minDistance = distance
-            shortestRoute = perm
+        if nearestCity >= 0 {
+            visited[nearestCity] = true
+            path = append(path, nearestCity)
+            currentCity = nearestCity
         }
     }
 
-	if len(shortestRoute) == 0 {
-        return nil, errors.New("no route found")
-    }
-
-    return shortestRoute, nil
+    // fmt.Println("path:", path)
+    return path, nil
 }
+
+// // Function to find the shortest route
+// func FindShortestRouteOld(matrix [][]int) ([]int, error) {
+//     n := len(matrix)
+//     if n == 0 {
+//         return nil, errors.New("distance matrix is empty")
+//     }
+
+//     // Create a slice of destination indices
+//     destinations := make([]int, n)
+//     for i := range destinations {
+//         destinations[i] = i
+//     }
+
+//     // Generate all permutations of destinations
+//     permutations := permute(destinations)
+
+//     minDistance := math.MaxInt32
+//     var shortestRoute []int
+
+//     // Iterate over all permutations to find the shortest route
+//     for _, perm := range permutations {
+//         distance := calculateDistance(perm, matrix)
+//         if distance < minDistance {
+//             minDistance = distance
+//             shortestRoute = perm
+//         }
+//     }
+
+// 	if len(shortestRoute) == 0 {
+//         return nil, errors.New("no route found")
+//     }
+
+//     fmt.Println("shortestRoute:", shortestRoute)
+//     return shortestRoute, nil
+// }
 
 // Function to generate all permutations of a slice
-func permute(nums []int) [][]int {
-    var result [][]int
-    var backtrack func(first int)
-    backtrack = func(first int) {
-        if first == len(nums) {
-            temp := make([]int, len(nums))
-            copy(temp, nums)
-            result = append(result, temp)
-        }
-        for i := first; i < len(nums); i++ {
-            nums[i], nums[first] = nums[first], nums[i]
-            backtrack(first + 1)
-            nums[i], nums[first] = nums[first], nums[i] // backtrack
-        }
-    }
-    backtrack(0)
-    return result
-}
+// func permute(nums []int) [][]int {
+//     var result [][]int
+//     var backtrack func(first int)
+//     backtrack = func(first int) {
+//         if first == len(nums) {
+//             temp := make([]int, len(nums))
+//             copy(temp, nums)
+//             result = append(result, temp)
+//         }
+//         for i := first; i < len(nums); i++ {
+//             nums[i], nums[first] = nums[first], nums[i]
+//             backtrack(first + 1)
+//             nums[i], nums[first] = nums[first], nums[i] // backtrack
+//         }
+//     }
+//     backtrack(0)
+//     return result
+// }
 
-// Function to calculate the total distance of a route
-func calculateDistance(route []int, matrix [][]int) int {
-    totalDistance := 0
-    for i := 0; i < len(route)-1; i++ {
-        totalDistance += matrix[route[i]][route[i+1]]
-    }
-    return totalDistance
-}
+// // Function to calculate the total distance of a route
+// func calculateDistance(route []int, matrix [][]int) int {
+//     totalDistance := 0
+//     for i := 0; i < len(route)-1; i++ {
+//         totalDistance += matrix[route[i]][route[i+1]]
+//     }
+//     return totalDistance
+// }

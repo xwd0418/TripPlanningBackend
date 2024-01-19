@@ -6,7 +6,7 @@
 package service
 
 import (
-	
+	// "fmt"
 	"log"
 	"strings"
 	"tripPlanning/backend"
@@ -40,6 +40,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 	// 2. plan route for each day,
 	var plannedRoutes [][]model.Place
 	for _, placesEachDay := range placesOfAllDays {
+		// fmt.Println("placesEachDay:", placesEachDay)
 		sortedPlaces, err := GenerateDayPlan(placesEachDay, transportation, "")
 		if err != nil {
 			log.Fatal("Error during sorting places for a day: ", err)

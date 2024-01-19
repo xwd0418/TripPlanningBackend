@@ -24,16 +24,18 @@ func TestSavePlacesToDB(t *testing.T) {
 		log.Fatal("Error during store fake user: ", err)
 	}
 
-	day1Places, err := service.GetDefaultPlaces(3)
+	day1Places, err := service.GetDefaultPlaces(3) // does this return a list of places?
+	// fmt.Println("day1Places:", day1Places)
 	if err != nil {
 		log.Fatal("failed to generaete recommended places day 1", err)
 	}
 	day2Places, err := service.SearchPlaces("museums", 2)
+	// fmt.Println("day2Places:", day2Places)
 	if err != nil {
 		log.Fatal("failed to generaete museum places, day2", err)
 	}
 
 	allPlaces := [][]model.Place{day1Places, day2Places}
 	fmt.Println("populating into DB")
-	service.GeneratePlanAndSaveToDB("backend_dev_user_id", allPlaces, "2024-02-10", "2024-02-11", "transit", "backend_test_1")
+	service.GeneratePlanAndSaveToDB("ef98aca7-f514-4a02-be25-58af4f0b6d3b", allPlaces, "2024-02-29", "2024-03-11", "taxi", "backend_generatePlan_test")
 }
