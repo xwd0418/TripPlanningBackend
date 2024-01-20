@@ -105,6 +105,7 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 }
 
 func ReadRowFromDB(query string) *sql.Row {
+	log.Printf("Row query statement is %s", query)
 	return db.QueryRow(query)
 }
 
@@ -113,6 +114,7 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 	if conditions != "" {
 		queryStatement += " WHERE " + conditions
 	}
+	log.Printf("query statement is %s", queryStatement)
 	rows, err := db.Query(queryStatement)
 	if err != nil {
 		log.Println("Query "+queryStatement+"fails: ", err)
@@ -124,10 +126,11 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 // CheckIfItemExistsInDB checks if an item exists in a specified column in a table
 func CheckIfItemExistsInDB(tableName string, columnName string, itemValue interface{}) (bool, error) {
 	var exists bool
-	query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = ?)", tableName, columnName)
-
+	query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = $1)", tableName, columnName)
+	// log.Printf("check duplicated place query is %s", query)
 	err := db.QueryRow(query, itemValue).Scan(&exists)
 	if err != nil {
+		log.Printf("error of query row during checking duplicated places %v", err)
 		return false, err
 	}
 	return exists, nil
@@ -177,19 +180,6 @@ func initAllTables() error {
 	}
 	fmt.Println("DayPlan table created successfully or already exists")
 
-	// Create DayPlaceRelation table
-	createDayPlaceRelationsTableSQL := `CREATE TABLE IF NOT EXISTS DayPlaceRelations (
-        placeID TEXT PRIMARY KEY,
-        dayPlanID TEXT REFERENCES DayPlans(dayPlanID),
-		visitOrder INT
-    );`
-	_, err = db.Exec(createDayPlaceRelationsTableSQL)
-	if err != nil {
-		log.Fatal(err)
-		return err
-	}
-	fmt.Println("DayPlaceRelation table created successfully or already exists")
-
 	// Create placeDetails table
 	createPlaceDetailsTableSQL := `CREATE TABLE IF NOT EXISTS PlaceDetails (
         placeID TEXT PRIMARY KEY,
@@ -206,6 +196,20 @@ func initAllTables() error {
 		return err
 	}
 	fmt.Println("PlaceDetails table created successfully or already exists")
+
+	// Create DayPlaceRelation table
+	createDayPlaceRelationsTableSQL := `CREATE TABLE IF NOT EXISTS DayPlaceRelations (
+        placeID TEXT REFERENCES PlaceDetails(placeID),
+        dayPlanID TEXT REFERENCES DayPlans(dayPlanID),
+		visitOrder INT,
+		PRIMARY KEY (placeID, dayPlanID)
+    );`
+	_, err = db.Exec(createDayPlaceRelationsTableSQL)
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+	fmt.Println("DayPlaceRelation table created successfully or already exists")
 
 	// Create Reviews table
 	createReviewsTableSQL := `CREATE TABLE IF NOT EXISTS Reviews (
@@ -248,6 +252,29 @@ func SaveUser(user *model.User) error {
 	_, err := db.Exec(query, user.Username, user.Password, user.Id, user.Email)
 	if err != nil {
 		return fmt.Errorf("error saving user: %w", err)
+	}
+
+	return nil
+}
+
+// DeleteFromDB
+func DeleteFromDB(tableName, conditionColumn string, conditionValue interface{}) error {
+	// Build the SQL statement
+	stmt := fmt.Sprintf("DELETE FROM %s WHERE %s = $1", tableName, conditionColumn)
+
+	// Prepare the statement
+	prepStmt, err := db.Prepare(stmt)
+	if err != nil {
+		log.Println("DB statement prepare failed, statement is ", stmt, err)
+		return err
+	}
+	defer prepStmt.Close()
+
+	// Execute the statement
+	_, err = prepStmt.Exec(conditionValue)
+	if err != nil {
+		log.Println("Error deleting from table", tableName, ":", err)
+		return err
 	}
 
 	return nil

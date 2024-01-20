@@ -14,7 +14,7 @@ type RequestData struct {
 	UserID          string          `json:"user_id"`
 	StartDay        string          `json:"start_day"`
 	EndDay          string          `json:"end_day"`
-	PlacesOfEachDay [][]model.Place `json:"place_ids_of_each_day"`
+	PlacesOfEachDay [][]model.Place `json:"place_of_each_day"`
 	Transportation  string          `json:"transportation"`
 	TripName        string          `json:"trip_name"`
 }
@@ -45,6 +45,7 @@ func GeneratePlanAndSaveHandler(w http.ResponseWriter, r *http.Request) {
 	// Send a response back to the client.
 	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, tripID)
+	w.Write([]byte(tripID))
+	// fmt.Fprintln(w, tripID)
 	fmt.Fprintln(w, "GeneratePlanAndSave request processed successfully.")
 }

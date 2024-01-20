@@ -15,6 +15,8 @@ import (
 	"tripPlanning/model"
 )
 
+var date_format_layout = "2006-01-02"
+
 type idWithOder struct {
 	ID    string
 	order int
@@ -27,8 +29,8 @@ func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
 func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
 	rows, err := backend.ReadFromDB(backend.TableName_Trips,
-		[]string{"tripname", "startday", "endday", "transportation"},
-		fmt.Sprintf("userid=%s", userID))
+		[]string{"tripID", "tripname", "startday", "endday", "transportation"},
+		fmt.Sprintf("userid='%s'", userID))
 	if err != nil {
 		log.Println("Error during reading all plans' overview: ", err)
 		return nil, err
@@ -37,7 +39,7 @@ func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
 	var tripPlans []model.TripPlan
 	for rows.Next() {
 		var p model.TripPlan
-		if err := rows.Scan(&p.TripName, &p.StartDay, &p.EndDay, &p.Transportation); err != nil {
+		if err := rows.Scan(&p.TripPlanId, &p.TripName, &p.StartDay, &p.EndDay, &p.Transportation); err != nil {
 			return nil, err
 		}
 		tripPlans = append(tripPlans, p)
@@ -52,14 +54,14 @@ func ReadAllDayPlansOfTripPlan(tripID string) ([]model.DayPlan, error) {
 
 	// get transportation and start_day
 	var transportation, start_day string
-	sql_row_query := fmt.Sprintf("SELECT transportation startDay FROM Trips WHERE tripID = %s", tripID)
+	sql_row_query := fmt.Sprintf("SELECT transportation, startDay FROM Trips WHERE tripID = '%s'", tripID)
 	backend.ReadRowFromDB(sql_row_query).Scan(&transportation, &start_day)
 
 	// get all day_plan ID with their order
-	rows, err := backend.ReadFromDB(backend.TableName_DayPlans, []string{"dayPlanID", "dayOrder"}, fmt.Sprintf("tripID=%s", tripID))
+	rows, err := backend.ReadFromDB(backend.TableName_DayPlans, []string{"dayPlanID", "dayOrder"}, fmt.Sprintf("tripID='%s'", tripID))
 
 	if err != nil {
-		log.Println("Error during reading all plans' overview: ", err)
+		log.Println("Error during reading all day_plans' overview: ", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -74,18 +76,21 @@ func ReadAllDayPlansOfTripPlan(tripID string) ([]model.DayPlan, error) {
 	sort.Sort(byID(dayIDsWithOrder))
 
 	// construct dayplan for each day
-	current_date, err := time.Parse(start_day, start_day)
+	current_date, err := time.Parse(date_format_layout, start_day)
 	if err != nil {
 		log.Println("Error during parsing date string: ", err)
 		return nil, err
 	}
 
+	// log.Printf("intial date string %s", start_day)
+
 	var dayPlans []model.DayPlan
 	for _, day := range dayIDsWithOrder {
 		var dayPlan model.DayPlan
 		dayPlan.Transportation = transportation
-		dayPlan.Date = current_date.Format(start_day)
+		dayPlan.Date = current_date.Format(date_format_layout)
 		current_date = current_date.Add(24 * time.Hour)
+		log.Printf("day id is %s", day.ID)
 		dayPlan.PlacesToVisit, err = getPlacesOfDay(day.ID)
 		if err != nil {
 			log.Println("Error during getting places details from a place id ", err)
@@ -93,12 +98,13 @@ func ReadAllDayPlansOfTripPlan(tripID string) ([]model.DayPlan, error) {
 		}
 		dayPlans = append(dayPlans, dayPlan)
 	}
+
 	return dayPlans, nil
 }
 
 func getPlacesOfDay(dayID string) ([]model.Place, error) {
 	// use sql query to find the day-places relation of each day
-	rows, err := backend.ReadFromDB(backend.TableName_DayPlaceRelations, []string{"placeID", "visitOrder"}, fmt.Sprintf("dayPlanID=%s", dayID))
+	rows, err := backend.ReadFromDB(backend.TableName_DayPlaceRelations, []string{"placeID", "visitOrder"}, fmt.Sprintf("dayPlanID='%s'", dayID))
 
 	if err != nil {
 		log.Println("Error during reading all place-day relations with given trip id: ", err)
@@ -107,22 +113,27 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 	defer rows.Close()
 	//  sort based on visited order
 	var placesWithOrder []idWithOder
+
+	// log.Printf("day id is %s ", dayID)
 	for rows.Next() {
 		var day_place_relation_datum idWithOder
 		if err := rows.Scan(&day_place_relation_datum.ID, &day_place_relation_datum.order); err != nil {
 			return nil, err
 		}
+		// log.Printf("place id is %s and order is %d", day_place_relation_datum.ID, day_place_relation_datum.order)
 		placesWithOrder = append(placesWithOrder, day_place_relation_datum)
+		// log.Printf("current place is %s", day_place_relation_datum.ID)
 	}
 	sort.Sort(byID(placesWithOrder))
 
 	// place should inlude place_id, lat, long
 	var detailedPlaces []model.Place
 	for _, place := range placesWithOrder {
+		// log.Println("place id", place.ID)
 		var detailedPlace model.Place
 		detailedPlace.Id = place.ID
-		location_query := fmt.Sprintf("SELECT longitude latitude FROM PlaceDetails WHERE placeID = %s", place.ID)
-		backend.ReadRowFromDB(location_query).Scan(&detailedPlace.Location.Longitude, &detailedPlace.Location.Latitude)
+		location_query := fmt.Sprintf("SELECT name, longitude, latitude FROM PlaceDetails WHERE placeID = '%s'", place.ID)
+		backend.ReadRowFromDB(location_query).Scan(&detailedPlace.DisplayName.Text, &detailedPlace.Location.Longitude, &detailedPlace.Location.Latitude)
 		detailedPlaces = append(detailedPlaces, detailedPlace)
 	}
 	return detailedPlaces, nil

@@ -1,13 +1,13 @@
 package model
 
 type TripPlan struct {
-	TripPlanId     string    `json:"-"`
+	TripPlanId     string    `json:"tripID"`
 	UserID         string    `json:"-"`
 	TripName       string    `json:"TripName"`
 	StartDay       string    `json:"StartDay"`
 	EndDay         string    `json:"EndDay"`
 	Transportation string    `json:"Transportation"`
-	DayPlans       []DayPlan `json:"DayPlans"`
+	DayPlans       []DayPlan `json:"-"`
 	City           string    `json:"City"`
 }
 

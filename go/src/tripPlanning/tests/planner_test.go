@@ -1,4 +1,4 @@
-package tests
+package service_test
 
 import (
 	"reflect"
@@ -28,13 +28,13 @@ import (
 // }
 
 func TestGetDistanceMatrix(t *testing.T) {
-    // Activate the httpmock
-    httpmock.Activate()
-    defer httpmock.DeactivateAndReset()
+	// Activate the httpmock
+	httpmock.Activate()
+	defer httpmock.DeactivateAndReset()
 
-    // Mock the expected request
-    httpmock.RegisterResponder("GET", "https://maps.googleapis.com/maps/api/distancematrix/json",
-    httpmock.NewStringResponder(200, `{
+	// Mock the expected request
+	httpmock.RegisterResponder("GET", "https://maps.googleapis.com/maps/api/distancematrix/json",
+		httpmock.NewStringResponder(200, `{
         "status": "OK",
         "origin_addresses": ["Central Park, New York, USA", "Brooklyn Bridge, New York, USA", "New York University, New York, USA"],
         "destination_addresses": ["Central Park, New York, USA", "Brooklyn Bridge, New York, USA", "New York University, New York, USA"],
@@ -99,35 +99,33 @@ func TestGetDistanceMatrix(t *testing.T) {
         ]
     }`))
 
+	// Define your input
+	places := []model.Place{
+		{DisplayName: model.Text{Text: "Central Park"}, Address: "New York, USA"},
+		{DisplayName: model.Text{Text: "Brooklyn Bridge"}, Address: "New York, USA"},
+		{DisplayName: model.Text{Text: "New York University"}, Address: "New York, USA"},
+		// ... other places
+	}
+	transportation := "driving"
 
+	// Call your function
+	matrix, err := service.GetDistanceMatrix(places, transportation)
 
-    // Define your input
-    places := []model.Place{
-        {DisplayName: model.Text{Text: "Central Park"}, Address: "New York, USA"},
-        {DisplayName: model.Text{Text: "Brooklyn Bridge"}, Address: "New York, USA"},
-        {DisplayName: model.Text{Text: "New York University"}, Address: "New York, USA"},
-        // ... other places
-    }
-    transportation := "driving"
+	// Check for errors
+	if err != nil {
+		t.Fatalf("YourMatrixFunction returned an unexpected error: %v", err)
+	}
 
-    // Call your function
-    matrix, err := service.GetDistanceMatrix(places, transportation)
+	// Define what you expect the matrix to look like
+	expectedMatrix := [][]int{
+		{0, 100, 200},
+		{100, 0, 200},
+		{100, 200, 0},
+	}
 
-    // Check for errors
-    if err != nil {
-        t.Fatalf("YourMatrixFunction returned an unexpected error: %v", err)
-    }
-
-    // Define what you expect the matrix to look like
-    expectedMatrix := [][]int{
-        {0, 100, 200},
-        {100, 0, 200},
-        {100, 200, 0}, 
-    }
-
-    // Check if the matrix matches your expectations
-    if !reflect.DeepEqual(matrix, expectedMatrix) {
-        t.Errorf("YourMatrixFunction = %v, want %v", matrix, expectedMatrix)
-    }
+	// Check if the matrix matches your expectations
+	if !reflect.DeepEqual(matrix, expectedMatrix) {
+		t.Errorf("YourMatrixFunction = %v, want %v", matrix, expectedMatrix)
+	}
 
 }
