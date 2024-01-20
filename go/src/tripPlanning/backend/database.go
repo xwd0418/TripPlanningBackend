@@ -279,3 +279,37 @@ func DeleteFromDB(tableName, conditionColumn string, conditionValue interface{})
 
 	return nil
 }
+
+
+// UpdateToDB
+func UpdateToDB(tableName string, idField string, idValue interface{}, updatedFields map[string]interface{}) error {
+	// Build the SQL statement for update
+	var placeholders []string
+	var values []interface{}
+
+    //placeholders -> the fields that need to be updated in the SQL statement
+	//values -> new values 
+	for k, v := range updatedFields {
+		placeholders = append(placeholders, fmt.Sprintf("%s=$%d", k, len(values)+1))
+		values = append(values, v)
+	}
+
+	stmt := fmt.Sprintf("UPDATE %s SET %s WHERE %s=$%d",
+		tableName,
+		strings.Join(placeholders, ", "),
+		idField,
+		len(values)+1,
+	)
+
+	// Prepare the statement
+	prepStmt, err := db.Prepare(stmt)
+	if err != nil {
+		log.Println("db statement prepare failed, statement is ", stmt, err)
+		return err
+	}
+	defer prepStmt.Close()
+
+	// Execute the update statement
+	_, err = prepStmt.Exec(values...)
+	return err
+}
