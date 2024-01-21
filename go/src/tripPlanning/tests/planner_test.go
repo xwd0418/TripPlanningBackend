@@ -99,14 +99,16 @@ func TestGetDistanceMatrix(t *testing.T) {
         ]
     }`))
 
-	// Define your input
-	places := []model.Place{
-		{DisplayName: model.Text{Text: "Central Park"}, Address: "New York, USA"},
-		{DisplayName: model.Text{Text: "Brooklyn Bridge"}, Address: "New York, USA"},
-		{DisplayName: model.Text{Text: "New York University"}, Address: "New York, USA"},
-		// ... other places
-	}
-	transportation := "driving"
+
+
+    // Define your input
+    places := []model.Place{
+        {DisplayName: model.Text{Text: "Central Park"}, Address: "New York, USA"},
+        {DisplayName: model.Text{Text: "Brooklyn Bridge"}, Address: "New York, USA"},
+        {DisplayName: model.Text{Text: "New York University"}, Address: "New York, USA"},
+        // ... other places
+    }
+    transportation := "driving"
 
 	// Call your function
 	matrix, err := service.GetDistanceMatrix(places, transportation)
