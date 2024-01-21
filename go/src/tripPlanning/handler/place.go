@@ -14,17 +14,22 @@ func showDefaultPlacesHandler(w http.ResponseWriter, r *http.Request) {
 
 	// 1. process request
 	max_num_display_str := r.URL.Query().Get("max_num_display")
-	// 2. call services to handle request
+	
+	// Set a default value for max_num_display
+	defaultMaxNumDisplay := 50
 	max_num_display, err := strconv.Atoi(max_num_display_str)
 	if err != nil {
-		log.Printf("Failed to convert max_num_display from showDefaultPlacesHandler to integer: %v", err)
-		return
+		log.Printf("Failed to convert max_num_display from showDefaultPlacesHandler to integer: %v. Using default value %d", err, defaultMaxNumDisplay)
+		max_num_display = defaultMaxNumDisplay
 	}
+
+	// 2. call services to handle request
 	default_places, err := service.GetDefaultPlaces(max_num_display)
 	if err != nil {
 		log.Printf("Failed to get default places: %v", err)
 		return
 	}
+
 	// 3. construct response  : post => json
 	js, err := json.Marshal(default_places)
 	if err != nil {
