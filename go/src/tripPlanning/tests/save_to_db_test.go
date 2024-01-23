@@ -33,7 +33,6 @@ func TestSavePlacesToDB(t *testing.T) {
 	}
 	day2Places, err := service.SearchPlaces("museums", 2)
 	// fmt.Println("day2Places:", day2Places)
-	// fmt.Println("day2Places:", day2Places)
 	if err != nil {
 		log.Fatal("failed to generaete museum places, day2", err)
 	}
@@ -44,7 +43,7 @@ func TestSavePlacesToDB(t *testing.T) {
 
 	allPlaces := [][]model.Place{day1Places, day2Places, day3Places}
 	fmt.Println("populating into DB")
-	tripID, err := service.GeneratePlanAndSaveToDB("ef98aca7-f514-4a02-be25-58af4f0b6d3b", allPlaces, "2024-02-29", "2024-03-11", "taxi", "backend_generatePlan_test")
+	tripID, err := service.GeneratePlanAndSaveToDB("ef98aca7-f514-4a02-be25-58af4f0b6d3b", allPlaces, "2024-01-22", "2024-03-11", "taxi", "backend_generatePlan_test")
 
 	// deprecated test
 	// tripID, err := service.GeneratePlanAndSaveToDB(userID, allPlaces, "2024-02-10", "2024-02-11", "transit", "backend_test_loading_all_trips")

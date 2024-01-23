@@ -48,7 +48,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 		}
 		plannedRoutes = append(plannedRoutes, sortedPlaces)
 	}
-	log.Printf("size of plannedRoutes is %d, %d", len(plannedRoutes), len(plannedRoutes[0]))
+	// log.Printf("size of plannedRoutes is %d, %d", len(plannedRoutes), len(plannedRoutes[0]))
 	// 3. save planned routes to db
 	for dayOrder, planedRoute := range plannedRoutes {
 		// 3.1 save each dayPlan to DB
