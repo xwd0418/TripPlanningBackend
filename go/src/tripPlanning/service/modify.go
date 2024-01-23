@@ -57,7 +57,7 @@ func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay 
 	}
 	err := backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
 	if err != nil {
-		log.Fatal("Error during store new trip plan: ", err)
+		log.Println("Error during store new trip plan: ", err)
 		return "", err
 	}
 	
@@ -96,7 +96,7 @@ func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay 
 			if !placeIsInDB {
 				err = SavePlaceToDB(place)
 				if err != nil {
-					log.Fatal("Error during store new trip place: ", err)
+					log.Println("Error during store new trip place: ", err)
 					return "", err
 				}
 			}
@@ -109,7 +109,7 @@ func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay 
 			}
 			err = backend.InsertIntoDB(backend.TableName_DayPlaceRelations, dayPlaceRelationEntry)
 			if err != nil {
-				log.Fatal("Error during store new day-place relation: ", err)
+				log.Println("Error during store new day-place relation: ", err)
 				return "", err
 			}
 		}

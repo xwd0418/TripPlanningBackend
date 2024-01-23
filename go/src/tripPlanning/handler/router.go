@@ -40,7 +40,9 @@ func InitRouter() *mux.Router {
 
 	// New delete route for a trip
 	router.Handle("/deleteTrip/{tripID}", http.HandlerFunc(DeleteTripHandler)).Methods("DELETE")
-
+    
+	// modify routing
+	router.Handle("/modifyTrip/{tripID}", http.HandlerFunc(modifyTripHandler)).Methods("POST")
 	fmt.Println("ready to receive requests")
 
 	// when fisrt sign in and sign up, no token authentication
