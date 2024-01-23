@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+
 	// "math"
 	"net/http"
 	"net/url"
@@ -18,7 +19,8 @@ import (
 	"tripPlanning/model"
 )
 
-func  GenerateDayPlan(places []model.Place, transportation string, date string) ([]model.Place, error) {
+func GenerateDayPlan(places []model.Place, transportation string, date string) ([]model.Place, error) {
+	// return places, nil
 	// Step 1: Create a matrix of distances between all places
 	distanceMatrix, err := GetDistanceMatrix(places, transportation)
 	if err != nil {
@@ -57,15 +59,15 @@ func GetDistanceMatrix(places []model.Place, transportation string) ([][]int, er
 		transportation,
 		constants.GOOGLE_MAP_API_KEY)
 
-    // // Log the full API request URL for debugging
-    // fmt.Println("API Request URL:", apiUrl)
+	// // Log the full API request URL for debugging
+	// fmt.Println("API Request URL:", apiUrl)
 
-    // Make the request
-    resp, err := http.Get(apiUrl)
-    if err != nil {
-        return nil, err
-    }
-    defer resp.Body.Close()
+	// Make the request
+	resp, err := http.Get(apiUrl)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
 
 	// Read and parse the response
 	body, err := io.ReadAll(resp.Body)
@@ -73,8 +75,8 @@ func GetDistanceMatrix(places []model.Place, transportation string) ([][]int, er
 		return nil, err
 	}
 
-    // Print the raw JSON response
-    // fmt.Println("Raw JSON response:", string(body))
+	// Print the raw JSON response
+	// fmt.Println("Raw JSON response:", string(body))
 
 	var matrixResponse model.DistanceMatrixResponse
 	if err := json.Unmarshal(body, &matrixResponse); err != nil {
@@ -103,50 +105,50 @@ func GetDistanceMatrix(places []model.Place, transportation string) ([][]int, er
 		return nil, errors.New("no origins provided or received in response")
 	}
 
-    for i, row := range matrixResponse.Rows {
-        distanceMatrix[i] = make([]int, numDestinations)
-        for j, element := range row.Elements {
-            if element.Status != "OK" {
-                return nil, fmt.Errorf("Error with element status: %s", element.Status)
-            }
-            distanceMatrix[i][j] = element.Distance.Value
-        }
-    }
-    
-    // fmt.Println("distanceMatrix", distanceMatrix)
-    return distanceMatrix, nil
+	for i, row := range matrixResponse.Rows {
+		distanceMatrix[i] = make([]int, numDestinations)
+		for j, element := range row.Elements {
+			if element.Status != "OK" {
+				return nil, fmt.Errorf("Error with element status: %s", element.Status)
+			}
+			distanceMatrix[i][j] = element.Distance.Value
+		}
+	}
+
+	// fmt.Println("distanceMatrix", distanceMatrix)
+	return distanceMatrix, nil
 }
 
-// find shortest route using Nearest Neighbor algorithm 
+// find shortest route using Nearest Neighbor algorithm
 func FindShortestRoute(distanceMatrix [][]int) ([]int, error) {
-    numCities := len(distanceMatrix)
-    visited := make([]bool, numCities)
-    path := make([]int, 0, numCities)
+	numCities := len(distanceMatrix)
+	visited := make([]bool, numCities)
+	path := make([]int, 0, numCities)
 
-    currentCity := 0
-    visited[currentCity] = true
-    path = append(path, currentCity)
+	currentCity := 0
+	visited[currentCity] = true
+	path = append(path, currentCity)
 
-    for len(path) < numCities {
-        nearestCity := -1
-        nearestDistance := int(^uint(0) >> 1) // Max Int value
+	for len(path) < numCities {
+		nearestCity := -1
+		nearestDistance := int(^uint(0) >> 1) // Max Int value
 
-        for city := 0; city < numCities; city++ {
-            if !visited[city] && distanceMatrix[currentCity][city] < nearestDistance {
-                nearestCity = city
-                nearestDistance = distanceMatrix[currentCity][city]
-            }
-        }
+		for city := 0; city < numCities; city++ {
+			if !visited[city] && distanceMatrix[currentCity][city] < nearestDistance {
+				nearestCity = city
+				nearestDistance = distanceMatrix[currentCity][city]
+			}
+		}
 
-        if nearestCity >= 0 {
-            visited[nearestCity] = true
-            path = append(path, nearestCity)
-            currentCity = nearestCity
-        }
-    }
+		if nearestCity >= 0 {
+			visited[nearestCity] = true
+			path = append(path, nearestCity)
+			currentCity = nearestCity
+		}
+	}
 
-    // fmt.Println("path:", path)
-    return path, nil
+	// fmt.Println("path:", path)
+	return path, nil
 }
 
 // // Function to find the shortest route

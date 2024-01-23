@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"tripPlanning/model"
@@ -36,16 +35,19 @@ func GeneratePlanAndSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call services
-	tripID, err := service.GeneratePlanAndSaveToDB(requestData.UserID, requestData.PlacesOfEachDay, requestData.StartDay,
+	tripPlans, err := service.GeneratePlanAndSaveToDB(requestData.UserID, requestData.PlacesOfEachDay, requestData.StartDay,
 		requestData.EndDay, requestData.Transportation, requestData.TripName)
 	if err != nil {
-		log.Printf("Failed to GeneratePlanAndSaveToDB : %v", err)
+		log.Printf("Failed to GeneratePlanAndSaveToDB, error: %v", err)
 		return
 	}
-	// Send a response back to the client.
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(tripID))
-	// fmt.Fprintln(w, tripID)
-	fmt.Fprintln(w, "GeneratePlanAndSave request processed successfully.")
+
+	// 3. construct response  : post => json
+	js, err := json.Marshal(tripPlans)
+	if err != nil {
+		http.Error(w, "Failed to parse day-plans into JSON format", http.StatusInternalServerError)
+		log.Printf("Failed to parse day-plans into JSON format %v.\n", err)
+		return
+	}
+	w.Write(js)
 }
