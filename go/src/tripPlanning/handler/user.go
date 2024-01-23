@@ -19,6 +19,7 @@ var mySigningKey = []byte("secret")
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received one signin request")
 	w.Header().Set("Content-Type", "text/plain")
+	// w.Header().Set("Content-Type", "application/json")
 	// Set sets the header entries associated with key to the single element value.
 	// It replaces any existing values associated with key.
 
@@ -52,6 +53,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	// 2.1 if sing in successfully first time, generate token for future use
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": user.Username,
+		"id": user.Id,
 		// we didn't include password in this file because this token can be reversed, and it's not safe to inlude password
 		"exp": time.Now().Add(time.Hour * 24).Unix(), // experition date
 	})
@@ -64,7 +66,24 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. generate response, return token to client
+	// 3. Generate response with token and user ID, return token to client
+	// response := struct {
+	// 	Token  string `json:"token"`
+	// 	UserID string `json:"id"`
+	// }{
+	// 	Token:  tokenString,
+	// 	UserID: user.Id,
+	// }
+
+	// responseData, err := json.Marshal(response)
+	// if err != nil {
+	// 	http.Error(w, "Failed to generate response data", http.StatusInternalServerError)
+	// 	fmt.Printf("Failed to generate response data %v\n", err)
+	// 	return
+	// }
+
+	// w.Write(responseData)
+
 	w.Write([]byte(tokenString))
 }
 
