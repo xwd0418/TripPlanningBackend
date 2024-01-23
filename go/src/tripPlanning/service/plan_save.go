@@ -15,7 +15,7 @@ import (
 	"github.com/pborman/uuid"
 )
 
-func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
+func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
 	startDay string, endDay string, transportation string, tripName string) ([]model.DayPlan, error) {
 	// params:
 	// placesOfAllDays: Each sub-array represent the planned places to visit each day
@@ -23,15 +23,21 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 
 	// 1. create a new TirpPlan for this user
 	tripID := uuid.New()
-	tripTableEntry := map[string]interface{}{
-		"tripID":         tripID,
-		"userID":         userID,
-		"tripName":       tripName,
-		"startDay":       startDay,
-		"endDay":         endDay,
-		"transportation": transportation,
+	user, err := backend.GetUser(username)
+	if err != nil {
+		log.Fatal("Error during reading user based on username from DB: ", err)
+		return nil, err
 	}
-	err := backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
+	tripTableEntry := map[string]interface{}{
+		"tripID":          tripID,
+		"userID":          user.Id,
+		"tripName":        tripName,
+		"startDay":        startDay,
+		"endDay":          endDay,
+		"transportation":  transportation,
+		"SamplePlaceName": placesOfAllDays[0][0].DisplayName.Text,
+	}
+	err = backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
 	if err != nil {
 		log.Fatal("Error during store new trip plan: ", err)
 		return nil, err

@@ -27,10 +27,15 @@ func (a byID) Len() int           { return len(a) }
 func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
 
-func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
+func ReadUserGeneralTripPlans(username string) ([]model.TripPlan, error) {
+	user, err := backend.GetUser(username)
+	if err != nil {
+		log.Fatal("Error during reading user based on username from DB: ", err)
+		return nil, err
+	}
 	rows, err := backend.ReadFromDB(backend.TableName_Trips,
-		[]string{"tripID", "tripname", "startday", "endday", "transportation"},
-		fmt.Sprintf("userid='%s'", userID))
+		[]string{"tripID", "tripname", "startday", "endday", "transportation", "SamplePlaceName"},
+		fmt.Sprintf("userid='%s'", user.Id))
 	if err != nil {
 		log.Println("Error during reading all plans' overview: ", err)
 		return nil, err
@@ -39,7 +44,7 @@ func ReadUserGeneralTripPlans(userID string) ([]model.TripPlan, error) {
 	var tripPlans []model.TripPlan
 	for rows.Next() {
 		var p model.TripPlan
-		if err := rows.Scan(&p.TripPlanId, &p.TripName, &p.StartDay, &p.EndDay, &p.Transportation); err != nil {
+		if err := rows.Scan(&p.TripPlanId, &p.TripName, &p.StartDay, &p.EndDay, &p.Transportation, &p.SamplePlaceName); err != nil {
 			return nil, err
 		}
 		tripPlans = append(tripPlans, p)

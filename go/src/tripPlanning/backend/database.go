@@ -114,7 +114,16 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 	if conditions != "" {
 		queryStatement += " WHERE " + conditions
 	}
-	log.Printf("query statement is %s", queryStatement)
+	// log.Printf("query statement is %s", queryStatement)
+	rows, err := db.Query(queryStatement)
+	if err != nil {
+		log.Println("Query "+queryStatement+"fails: ", err)
+		return nil, err
+	}
+	return rows, nil
+}
+
+func QueryRowsFromDB(queryStatement string) (*sql.Rows, error) {
 	rows, err := db.Query(queryStatement)
 	if err != nil {
 		log.Println("Query "+queryStatement+"fails: ", err)
@@ -158,7 +167,8 @@ func initAllTables() error {
 		tripName TEXT NOT NULL,
 		startDay TEXT NOT NULL,
 		endDay Text NOT NULL,
-		transportation TEXT 
+		transportation TEXT ,
+		SamplePlaceName TEXT
     );`
 	_, err = db.Exec(createTripTableSQL)
 	if err != nil {
@@ -280,15 +290,14 @@ func DeleteFromDB(tableName, conditionColumn string, conditionValue interface{})
 	return nil
 }
 
-
 // UpdateToDB
 func UpdateToDB(tableName string, idField string, idValue interface{}, updatedFields map[string]interface{}) error {
 	// Build the SQL statement for update
 	var placeholders []string
 	var values []interface{}
 
-    //placeholders -> the fields that need to be updated in the SQL statement
-	//values -> new values 
+	//placeholders -> the fields that need to be updated in the SQL statement
+	//values -> new values
 	for k, v := range updatedFields {
 		placeholders = append(placeholders, fmt.Sprintf("%s=$%d", k, len(values)+1))
 		values = append(values, v)

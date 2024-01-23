@@ -12,10 +12,10 @@ func readUserGeneralTripsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	// 1. process request
-	user_id := r.URL.Query().Get("user_id")
+	username := r.URL.Query().Get("username")
 	// 2. call services to handle request
 
-	tripPlans, err := service.ReadUserGeneralTripPlans(user_id)
+	tripPlans, err := service.ReadUserGeneralTripPlans(username)
 	if err != nil {
 		log.Printf("Failed to get tripPlans, error: %v", err)
 		return

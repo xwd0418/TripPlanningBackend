@@ -10,7 +10,7 @@ import (
 
 // RequestData represents the JSON data structure expected in the request body.
 type RequestData struct {
-	UserID          string          `json:"user_id"`
+	Username        string          `json:"username"`
 	StartDay        string          `json:"start_day"`
 	EndDay          string          `json:"end_day"`
 	PlacesOfEachDay [][]model.Place `json:"place_of_each_day"`
@@ -35,7 +35,7 @@ func GeneratePlanAndSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call services
-	tripPlans, err := service.GeneratePlanAndSaveToDB(requestData.UserID, requestData.PlacesOfEachDay, requestData.StartDay,
+	tripPlans, err := service.GeneratePlanAndSaveToDB(requestData.Username, requestData.PlacesOfEachDay, requestData.StartDay,
 		requestData.EndDay, requestData.Transportation, requestData.TripName)
 	if err != nil {
 		log.Printf("Failed to GeneratePlanAndSaveToDB, error: %v", err)
