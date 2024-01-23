@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 
 	// "math"
 	"net/http"
@@ -39,7 +40,12 @@ func GenerateDayPlan(places []model.Place, transportation string, date string) (
 		reorderedPlaces[i] = places[idx]
 	}
 
-	return places, nil
+	log.Println("new order is:", shortestRouteIndices)
+
+	for i := range shortestRouteIndices {
+		log.Println("places:", reorderedPlaces[i].DisplayName)
+	}
+	return reorderedPlaces, nil
 }
 
 // Use Google Maps Distance Matrix API to get distances between places

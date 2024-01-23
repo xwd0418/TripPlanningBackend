@@ -31,7 +31,7 @@ func InitRouter() *mux.Router {
 	router.Handle("/getAllPlansOfUser", http.HandlerFunc(readUserGeneralTripsHandler)).Methods("GET")
 	router.Handle("/getTripInfo", http.HandlerFunc(readAllDayPlansOfTripPlanHandler)).Methods("GET")
 
-	// DB saving routing
+	// DB saving routing yc commented for testing
 	router.Handle("/generateTripPlan", http.HandlerFunc(GeneratePlanAndSaveHandler)).Methods("POST")
 	// NEED CHANGE: HOW TO SEND INPUT AS JSON
 

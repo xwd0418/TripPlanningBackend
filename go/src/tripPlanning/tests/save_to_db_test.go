@@ -33,7 +33,6 @@ func TestSavePlacesToDB(t *testing.T) {
 	}
 	day2Places, err := service.SearchPlaces("museums", 2)
 	// fmt.Println("day2Places:", day2Places)
-	// fmt.Println("day2Places:", day2Places)
 	if err != nil {
 		log.Fatal("failed to generaete museum places, day2", err)
 	}
