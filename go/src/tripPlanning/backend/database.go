@@ -123,6 +123,24 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 	return rows, nil
 }
 
+
+func ReadFromDB_user(tableName string, columnsToRead []string, conditions string, values ...interface{}) (*sql.Rows, error) {
+    queryStatement := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columnsToRead, ", "), tableName)
+    if conditions != "" {
+        queryStatement += " WHERE " + conditions
+    }
+    rows, err := db.Query(queryStatement, values...)
+    if err != nil {
+        log.Println("Query "+queryStatement+" fails: ", err)
+        return nil, err
+    }
+    return rows, nil
+}
+
+
+
+
+
 func QueryRowsFromDB(queryStatement string) (*sql.Rows, error) {
 	rows, err := db.Query(queryStatement)
 	if err != nil {

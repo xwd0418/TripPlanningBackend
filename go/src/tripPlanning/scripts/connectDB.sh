@@ -1,1 +1,2 @@
-psql "host=10.120.64.3 port=5432 sslmode=disable dbname=TripPlanningDatabase user=postgres"
+psql "host=localhost port=5432 sslmode=disable dbname=travelplanner user=postgres password=1234"
+
