@@ -45,9 +45,12 @@ func InitRouter() *mux.Router {
 	router.Handle("/modifyTrip/{tripID}", http.HandlerFunc(modifyTripHandler)).Methods("POST")
 	fmt.Println("ready to receive requests")
 
-	// when fisrt sign in and sign up, no token authentication
-	router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")
-	router.Handle("/login", http.HandlerFunc(loginHandler)).Methods("POST")
+	 // when fisrt sign in and sign up, no token authentication
+	 router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")
+	 router.Handle("/login", http.HandlerFunc(loginHandler)).Methods("POST")
 
+	 // when click "recommendation plan"
+	 router.Handle("/recommendation", http.HandlerFunc(AiGeneratedPlanHandler)).Methods("POST")
+	 
 	return router
 }
