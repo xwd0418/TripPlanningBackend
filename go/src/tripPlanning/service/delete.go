@@ -11,7 +11,7 @@ import (
 // Service function to delete a trip and associated day plans and place relations
 func DeleteTripWithAssociations(tripID string) error {
 	// Check if the trip exists
-	exists, err := backend.CheckIfItemExistsInDB(backend.TableName_Trips, "tripID", tripID)
+	exists, err := backend.CheckIfItemExistsInDB("trips", "tripid", tripID)
 	if err != nil {
 		log.Println("Error checking if the trip ID exists in the database:", err)
 		return err
@@ -30,7 +30,7 @@ func DeleteTripWithAssociations(tripID string) error {
 	}
 
 	// Delete the trip entry
-	err = backend.DeleteFromDB(backend.TableName_Trips, "tripID", tripID)
+	err = backend.DeleteFromDB("trips", "tripid", tripID)
 	if err != nil {
 		log.Println("Error deleting the trip:", err)
 		return err
@@ -40,15 +40,14 @@ func DeleteTripWithAssociations(tripID string) error {
 }
 
 func DeleteDayPlansForTrip(tripID string) error {
-	// Read day plan IDs associated with the trip from the database
-	columns := []string{"day_plan_id"}
-	conditions := fmt.Sprintf("trip_id = '%s'", tripID)
-	rows, err := backend.ReadFromDB("day_plans", columns, conditions)
-	if err != nil {
-		log.Println("Error reading day plans for trip:", err)
-		return err
-	}
-	defer rows.Close()
+    columns := []string{"dayplanid"}
+    conditions := fmt.Sprintf("tripid = '%s'", tripID)
+    rows, err := backend.ReadFromDB("dayplans", columns, conditions)
+    if err != nil {
+        log.Println("Error reading day plans for trip:", err)
+        return err
+    }
+    defer rows.Close()
 
 	var dayPlans []string
 
@@ -77,7 +76,7 @@ func DeleteDayPlansForTrip(tripID string) error {
 
 func DeleteDayPlanWithAssociations(dayPlanID string) error {
 	// Check if the day plan exists
-	exists, err := backend.CheckIfItemExistsInDB(backend.TableName_DayPlans, "dayPlanID", dayPlanID)
+	exists, err := backend.CheckIfItemExistsInDB("dayplans", "dayplanid", dayPlanID)
 	if err != nil {
 		log.Println("Error checking if the day plan ID exists in the database:", err)
 		return err
@@ -89,14 +88,14 @@ func DeleteDayPlanWithAssociations(dayPlanID string) error {
 	}
 
 	// Delete associated place relations
-	err = backend.DeleteFromDB(backend.TableName_DayPlaceRelations, "dayPlanID", dayPlanID)
+	err = backend.DeleteFromDB("dayplacerelations", "dayplanid", dayPlanID)
 	if err != nil {
 		log.Println("Error deleting associated place relations:", err)
 		return err
 	}
 
 	// Delete the day plan entry
-	err = backend.DeleteFromDB(backend.TableName_DayPlans, "dayPlanID", dayPlanID)
+	err = backend.DeleteFromDB("dayplans", "dayplanid", dayPlanID)
 	if err != nil {
 		log.Println("Error deleting the day plan:", err)
 		return err
