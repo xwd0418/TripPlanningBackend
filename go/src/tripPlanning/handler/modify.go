@@ -63,3 +63,35 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"new_trip_id": newTripID})
 }
+
+func generateExactTripHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request to modify trip")
+
+	if r.Method != "POST" {
+        http.Error(w, "Method is not supported.", http.StatusNotFound)
+        return
+    }
+
+    var exactTripPlan model.TripPlan
+    err := json.NewDecoder(r.Body).Decode(&exactTripPlan)
+    if err != nil {
+		log.Printf("Error decoding request body: %v", err)
+        http.Error(w, err.Error(), http.StatusBadRequest)
+        return
+    }
+
+	var exactPlacesOfAllDays [][]model.Place
+	for _, dayPlan := range exactTripPlan.DayPlans {
+		exactPlacesOfAllDays = append(exactPlacesOfAllDays, dayPlan.PlacesToVisit)
+	}
+
+    tripID, err := service.GenerateExactTrip(exactTripPlan.UserID, exactPlacesOfAllDays, exactTripPlan.StartDay, exactTripPlan.EndDay, exactTripPlan.Transportation, exactTripPlan.TripName)
+    if err != nil {
+        log.Println("Error in generating trip:", err)
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(map[string]string{"tripID": tripID})
+}
