@@ -11,11 +11,11 @@ import (
 // RequestData represents the JSON data structure expected in the request body.
 type RequestData struct {
 	Username        string          `json:"username"`
-	StartDay        string          `json:"start_day"`
-	EndDay          string          `json:"end_day"`
-	PlacesOfEachDay [][]model.Place `json:"place_of_each_day"`
-	Transportation  string          `json:"transportation"`
-	TripName        string          `json:"trip_name"`
+	StartDay        string          `json:"StartDay"`
+	EndDay          string          `json:"EndDay"`
+	PlacesOfEachDay [][]model.Place `json:"places"`
+	Transportation  string          `json:"Transportation"`
+	TripName        string          `json:"TripName"`
 }
 
 // this will return the tripId in database
