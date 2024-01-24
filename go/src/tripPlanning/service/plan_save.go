@@ -16,17 +16,18 @@ import (
 )
 
 func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
-	startDay string, endDay string, transportation string, tripName string) ([]model.DayPlan, error) {
+	startDay string, endDay string, transportation string, tripName string) (model.TripPlan, error) {
 	// params:
 	// placesOfAllDays: Each sub-array represent the planned places to visit each day
 	// return： Trip ID
 
+	var plansToShow model.TripPlan
 	// 1. create a new TirpPlan for this user
 	tripID := uuid.New()
 	user, err := backend.GetUser(username)
 	if err != nil {
 		log.Fatal("Error during reading user based on username from DB: ", err)
-		return nil, err
+		return plansToShow, err
 	}
 	tripTableEntry := map[string]interface{}{
 		"tripID":          tripID,
@@ -40,7 +41,7 @@ func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
 	err = backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
 	if err != nil {
 		log.Fatal("Error during store new trip plan: ", err)
-		return nil, err
+		return plansToShow, err
 	}
 
 	// 2. plan route for each day,
@@ -50,7 +51,7 @@ func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
 		sortedPlaces, err := GenerateDayPlan(placesEachDay, transportation, "")
 		if err != nil {
 			log.Fatal("Error during sorting places for a day: ", err)
-			return nil, err
+			return plansToShow, err
 		}
 		plannedRoutes = append(plannedRoutes, sortedPlaces)
 	}
@@ -68,7 +69,7 @@ func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
 
 		if err != nil {
 			log.Println("Error during store new day-plan: ", err)
-			return nil, err
+			return plansToShow, err
 		}
 		// log.Printf("save to db dayplans with day_id %s tripID %s, order %d", currentDayPlanId, tripID, dayOrder+1)
 		// 3.2 save each places of the day
@@ -78,13 +79,13 @@ func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
 			placeIsInDB, err := backend.CheckIfItemExistsInDB(backend.TableName_PlaceDetails, "placeID", placeID)
 			if err != nil {
 				log.Println("Error during checking if place ID already exists: ", err)
-				return nil, err
+				return plansToShow, err
 			}
 			if !placeIsInDB {
 				err = SavePlaceToDB(place)
 				if err != nil {
 					log.Fatal("Error during store new trip place: ", err)
-					return nil, err
+					return plansToShow, err
 				}
 			}
 			// 3.2.1 save the day-place relation
@@ -96,14 +97,14 @@ func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
 			err = backend.InsertIntoDB(backend.TableName_DayPlaceRelations, dayPlaceRelationEntry)
 			if err != nil {
 				log.Fatal("Error during store new day-place relation: ", err)
-				return nil, err
+				return plansToShow, err
 			}
 		}
 	}
-	plansToShow, err := ReadAllDayPlansOfTripPlan(tripID)
+	plansToShow, err = ReadAllDayPlansOfTripPlan(tripID)
 	if err != nil {
 		log.Println("Error reading the plan that is just saved to DB: ", err)
-		return nil, err
+		return plansToShow, err
 	}
 	return plansToShow, nil
 }

@@ -105,7 +105,7 @@ func InsertIntoDB(tableName string, entry map[string]interface{}, additional_que
 }
 
 func ReadRowFromDB(query string) *sql.Row {
-	log.Printf("Row query statement is %s", query)
+	// log.Printf("Row query statement is %s", query)
 	return db.QueryRow(query)
 }
 

@@ -43,7 +43,7 @@ func TestSavePlacesToDB(t *testing.T) {
 
 	allPlaces := [][]model.Place{day1Places, day2Places, day3Places}
 	fmt.Println("populating into DB")
-	dayPlans, err := service.GeneratePlanAndSaveToDB("backend_dev_01_14", allPlaces, "2024-03-10", "2024-03-11", "driving", "backend_generatePlan_test")
+	theTripPlan, err := service.GeneratePlanAndSaveToDB("backend_dev_01_14", allPlaces, "2024-03-10", "2024-03-11", "driving", "backend_generatePlan_test")
 
 	// deprecated test
 	// tripID, err := service.GeneratePlanAndSaveToDB(userID, allPlaces, "2024-02-10", "2024-02-11", "transit", "backend_test_loading_all_trips")
@@ -51,5 +51,5 @@ func TestSavePlacesToDB(t *testing.T) {
 	if err != nil {
 		log.Fatal("failed to generaete routes", err)
 	}
-	log.Printf("generated dayplan start date is %s", dayPlans[0].Date)
+	log.Printf("generated dayplan start date is %s", theTripPlan.StartDay)
 }
