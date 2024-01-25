@@ -14,7 +14,7 @@ func TestGenerateExactTrip(t *testing.T) {
     // Create and add a new user
 	// Username for testing needs to be unique every time
     newUser := &model.User{
-        Username: "testUser21",
+        Username: "testUser23",
         Password: "testPassword",
         Email:    "testuser@example.com",
     }
@@ -31,22 +31,15 @@ func TestGenerateExactTrip(t *testing.T) {
     startDay := "2024-02-10"
     endDay := "2024-02-12"
     transportation := "Bus"
-    tripName := "Original Trip Name"
-    tripID, err := service.GeneratePlanAndSaveToDB(userID, placesOfAllDays, startDay, endDay, transportation, tripName)
+    tripName := "Trip Name"
+    tripID, err := service.GenerateExactTrip(userID, placesOfAllDays, startDay, endDay, transportation, tripName)
     if err != nil {
         t.Fatalf("Error during generating and storing trip: %v", err)
     }
+    if tripID == "" {
+		log.Println("Failed to generate the exact trip plan as requested")
+	}
 
-    // Modify the trip
-    newStartDay := "2024-02-15"
-    newEndDay := "2024-02-20"
-    newTransportation := "Car"
-    newTripName := "Modified Trip Name"
-    modifiedTripID, err := service.ModifyTrip(userID, tripID, placesOfAllDays, newStartDay, newEndDay, newTransportation, newTripName)
-    if err != nil {
-        t.Fatalf("Error modifying trip: %v", err)
-    }
-    log.Printf("The trip has been successfully modified. New trip ID: %s", modifiedTripID)
-    // Assertions and verifications
-    // Verify that a new trip ID is generated, and other expected changes occurred
+    log.Printf("The trip has been successfully generated as requested. Trip ID: %s", tripID)
+
 }
