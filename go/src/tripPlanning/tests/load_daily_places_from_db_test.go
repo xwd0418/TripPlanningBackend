@@ -12,14 +12,14 @@ func TestLoadPlacesFromDB(t *testing.T) {
 
 	backend.InitDB()
 
-	dayPlans, err := service.ReadAllDayPlansOfTripPlan(`94625430-7351-4f6c-8c26-220e2c5e0ccf`)
+	tripPlan, err := service.ReadAllDayPlansOfTripPlan(`970e9ae8-7e15-4ce3-b048-183126ed635f`)
 	if err != nil {
 		panic(" ReadAllDayPlansOfTripPlan failed ")
 	}
 
-	dayPlans_json, err := json.Marshal(dayPlans)
+	tripPlans_json, err := json.Marshal(tripPlan)
 	if err != nil {
 		panic(" marshling error")
 	}
-	fmt.Print("dayplans:", (string(dayPlans_json)))
+	fmt.Print("the trip plan is :", (string(tripPlans_json)))
 }

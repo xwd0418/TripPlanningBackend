@@ -19,7 +19,7 @@ func DeleteTripWithAssociations(tripID string) error {
 
 	if !exists {
 		// Return an error or handle the case where the trip doesn't exist
-		return fmt.Errorf("Trip with ID %s does not exist", tripID)
+		return fmt.Errorf("trip with ID %s does not exist", tripID)
 	}
 
 	// Delete associated day plans
@@ -84,7 +84,7 @@ func DeleteDayPlanWithAssociations(dayPlanID string) error {
 
 	if !exists {
 		// Return an error or handle the case where the day plan doesn't exist
-		return fmt.Errorf("Day plan with ID %s does not exist", dayPlanID)
+		return fmt.Errorf("day plan with ID %s does not exist", dayPlanID)
 	}
 
 	// Delete associated place relations

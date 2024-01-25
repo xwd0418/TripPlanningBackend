@@ -25,11 +25,14 @@ func TestSavePlacesToDB(t *testing.T) {
 		log.Fatal("Error during store fake user: ", err)
 	}
 
-	day1Places, err := service.GetDefaultPlaces(3)
+	day1Places, err := service.GetDefaultPlaces(3) // does this return a list of places?
+	// fmt.Println("day1Places:", day1Places)
+
 	if err != nil {
 		log.Fatal("failed to generaete recommended places day 1", err)
 	}
 	day2Places, err := service.SearchPlaces("museums", 2)
+	// fmt.Println("day2Places:", day2Places)
 	if err != nil {
 		log.Fatal("failed to generaete museum places, day2", err)
 	}
@@ -40,10 +43,13 @@ func TestSavePlacesToDB(t *testing.T) {
 
 	allPlaces := [][]model.Place{day1Places, day2Places, day3Places}
 	fmt.Println("populating into DB")
-	tripID, err := service.GeneratePlanAndSaveToDB(userID, allPlaces, "2024-02-10", "2024-02-11", "transit", "backend_test_loading_all_trips")
+	theTripPlan, err := service.GeneratePlanAndSaveToDB("backend_dev_01_14", allPlaces, "2024-03-10", "2024-03-11", "driving", "backend_generatePlan_test")
+
+	// deprecated test
+	// tripID, err := service.GeneratePlanAndSaveToDB(userID, allPlaces, "2024-02-10", "2024-02-11", "transit", "backend_test_loading_all_trips")
 
 	if err != nil {
 		log.Fatal("failed to generaete routes", err)
 	}
-	log.Printf("generated tripID is %s", tripID)
+	log.Printf("generated dayplan start date is %s", theTripPlan.StartDay)
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"tripPlanning/model"
@@ -11,12 +10,12 @@ import (
 
 // RequestData represents the JSON data structure expected in the request body.
 type RequestData struct {
-	UserID          string          `json:"user_id"`
-	StartDay        string          `json:"start_day"`
-	EndDay          string          `json:"end_day"`
-	PlacesOfEachDay [][]model.Place `json:"place_of_each_day"`
-	Transportation  string          `json:"transportation"`
-	TripName        string          `json:"trip_name"`
+	Username        string          `json:"username"`
+	StartDay        string          `json:"StartDay"`
+	EndDay          string          `json:"EndDay"`
+	PlacesOfEachDay [][]model.Place `json:"places"`
+	Transportation  string          `json:"Transportation"`
+	TripName        string          `json:"TripName"`
 }
 
 // this will return the tripId in database
@@ -36,16 +35,19 @@ func GeneratePlanAndSaveHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// call services
-	tripID, err := service.GeneratePlanAndSaveToDB(requestData.UserID, requestData.PlacesOfEachDay, requestData.StartDay,
+	tripPlans, err := service.GeneratePlanAndSaveToDB(requestData.Username, requestData.PlacesOfEachDay, requestData.StartDay,
 		requestData.EndDay, requestData.Transportation, requestData.TripName)
 	if err != nil {
-		log.Printf("Failed to GeneratePlanAndSaveToDB : %v", err)
+		log.Printf("Failed to GeneratePlanAndSaveToDB, error: %v", err)
 		return
 	}
-	// Send a response back to the client.
-	w.Header().Set("Content-Type", "text/plain")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(tripID))
-	// fmt.Fprintln(w, tripID)
-	fmt.Fprintln(w, "GeneratePlanAndSave request processed successfully.")
+
+	// 3. construct response  : post => json
+	js, err := json.Marshal(tripPlans)
+	if err != nil {
+		http.Error(w, "Failed to parse day-plans into JSON format", http.StatusInternalServerError)
+		log.Printf("Failed to parse day-plans into JSON format %v.\n", err)
+		return
+	}
+	w.Write(js)
 }

@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// save new user to database
 func AddUser(user *model.User) (bool, error) {
     // Check if the username already exists
     existingUser, err := backend.GetUser(user.Username)
@@ -23,7 +24,7 @@ func AddUser(user *model.User) (bool, error) {
     }
 
     // Save the new user
-    //TODO: generate id 
+    // generate id 
     user.Id = uuid.New().String()
     err = backend.SaveUser(user)
     if err != nil {
@@ -34,7 +35,7 @@ func AddUser(user *model.User) (bool, error) {
     return true, nil
 }
 
-
+//
 func CheckUser(username, password string) (bool, error) { //Checkuser
     user, err := backend.GetUser(username)
     if err != nil {

@@ -6,6 +6,7 @@
 package service
 
 import (
+	// "fmt"
 	"log"
 	"strings"
 	"tripPlanning/backend"
@@ -14,35 +15,43 @@ import (
 	"github.com/pborman/uuid"
 )
 
-func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
-	startDay string, endDay string, transportation string, tripName string) (string, error) {
+func GeneratePlanAndSaveToDB(username string, placesOfAllDays [][]model.Place,
+	startDay string, endDay string, transportation string, tripName string) (model.TripPlan, error) {
 	// params:
 	// placesOfAllDays: Each sub-array represent the planned places to visit each day
 	// return： Trip ID
 
+	var plansToShow model.TripPlan
 	// 1. create a new TirpPlan for this user
 	tripID := uuid.New()
-	tripTableEntry := map[string]interface{}{
-		"tripID":         tripID,
-		"userID":         userID,
-		"tripName":       tripName,
-		"startDay":       startDay,
-		"endDay":         endDay,
-		"transportation": transportation,
+	user, err := backend.GetUser(username)
+	if err != nil {
+		log.Fatal("Error during reading user based on username from DB: ", err)
+		return plansToShow, err
 	}
-	err := backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
+	tripTableEntry := map[string]interface{}{
+		"tripID":          tripID,
+		"userID":          user.Id,
+		"tripName":        tripName,
+		"startDay":        startDay,
+		"endDay":          endDay,
+		"transportation":  transportation,
+		"SamplePlaceName": placesOfAllDays[0][0].DisplayName.Text,
+	}
+	err = backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
 	if err != nil {
 		log.Fatal("Error during store new trip plan: ", err)
-		return "", err
+		return plansToShow, err
 	}
 
 	// 2. plan route for each day,
 	var plannedRoutes [][]model.Place
 	for _, placesEachDay := range placesOfAllDays {
+		// fmt.Println("placesEachDay:", placesEachDay)
 		sortedPlaces, err := GenerateDayPlan(placesEachDay, transportation, "")
 		if err != nil {
 			log.Fatal("Error during sorting places for a day: ", err)
-			return "", err
+			return plansToShow, err
 		}
 		plannedRoutes = append(plannedRoutes, sortedPlaces)
 	}
@@ -60,7 +69,7 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 
 		if err != nil {
 			log.Println("Error during store new day-plan: ", err)
-			return "", err
+			return plansToShow, err
 		}
 		// log.Printf("save to db dayplans with day_id %s tripID %s, order %d", currentDayPlanId, tripID, dayOrder+1)
 		// 3.2 save each places of the day
@@ -70,13 +79,13 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 			placeIsInDB, err := backend.CheckIfItemExistsInDB(backend.TableName_PlaceDetails, "placeID", placeID)
 			if err != nil {
 				log.Println("Error during checking if place ID already exists: ", err)
-				return "", err
+				return plansToShow, err
 			}
 			if !placeIsInDB {
 				err = SavePlaceToDB(place)
 				if err != nil {
 					log.Fatal("Error during store new trip place: ", err)
-					return "", err
+					return plansToShow, err
 				}
 			}
 			// 3.2.1 save the day-place relation
@@ -88,11 +97,16 @@ func GeneratePlanAndSaveToDB(userID string, placesOfAllDays [][]model.Place,
 			err = backend.InsertIntoDB(backend.TableName_DayPlaceRelations, dayPlaceRelationEntry)
 			if err != nil {
 				log.Fatal("Error during store new day-place relation: ", err)
-				return "", err
+				return plansToShow, err
 			}
 		}
 	}
-	return tripID, nil
+	plansToShow, err = ReadAllDayPlansOfTripPlan(tripID)
+	if err != nil {
+		log.Println("Error reading the plan that is just saved to DB: ", err)
+		return plansToShow, err
+	}
+	return plansToShow, nil
 }
 
 func SavePlaceToDB(place model.Place) error {

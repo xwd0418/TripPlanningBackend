@@ -12,7 +12,7 @@ import (
 func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request to modify trip")
 
-	//method check 
+	//method check
 	if r.Method != "POST" {
 		log.Println("Invalid request method: ", r.Method)
 		http.Error(w, "Only POST method is accepted", http.StatusMethodNotAllowed)
@@ -27,7 +27,7 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//request body decoding 
+	//request body decoding
 	var tripPlan model.TripPlan
 	err := json.NewDecoder(r.Body).Decode(&tripPlan)
 	if err != nil {
@@ -46,14 +46,14 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Extracting placesOfAllDays from DayPlans
-	var placesOfAllDays [][]model.Place
-	for _, dayPlan := range tripPlan.DayPlans {
-		placesOfAllDays = append(placesOfAllDays, dayPlan.PlacesToVisit)
-	}
+	placesOfAllDays := tripPlan.Places
+	// for _, dayPlan := range tripPlan.DayPlans {
+	// 	placesOfAllDays = append(placesOfAllDays, dayPlan.PlacesToVisit)
+	// }
 
-	newTripID, err := service.ModifyTrip(tripPlan.UserID, urlTripID, placesOfAllDays, tripPlan.StartDay, tripPlan.EndDay, tripPlan.Transportation, tripPlan.TripName) 
+	newTripID, err := service.ModifyTrip(tripPlan.UserID, urlTripID, placesOfAllDays, tripPlan.StartDay, tripPlan.EndDay, tripPlan.Transportation, tripPlan.TripName)
 	if err != nil {
-        log.Printf("Error modifying trip: %v", err)
+		log.Printf("Error modifying trip: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -63,6 +63,7 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"new_trip_id": newTripID})
 }
+
 
 func generateExactTripHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("Received request to modify trip")
@@ -95,3 +96,4 @@ func generateExactTripHandler(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(map[string]string{"tripID": tripID})
 }
+
