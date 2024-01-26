@@ -52,6 +52,7 @@ func InitRouter() http.Handler {
 	// when fisrt sign in and sign up, no token authentication
 	router.Handle("/signup", http.HandlerFunc(signupHandler)).Methods("POST")
 	router.Handle("/login", http.HandlerFunc(loginHandler)).Methods("POST")
+	router.Handle("/recommendation", http.HandlerFunc(AiGeneratedPlanHandler)).Methods("POST")
 
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	headersOk := handlers.AllowedHeaders([]string{"Authorization", "Content-Type"})
