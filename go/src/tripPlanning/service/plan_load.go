@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 	"time"
 	"tripPlanning/backend"
 	"tripPlanning/model"
@@ -136,9 +137,22 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 		// log.Println("place id", place.ID)
 		var detailedPlace model.Place
 		detailedPlace.Id = place.ID
-		location_query := fmt.Sprintf("SELECT name, longitude, latitude FROM PlaceDetails WHERE placeID = '%s'", place.ID)
-		backend.ReadRowFromDB(location_query).Scan(&detailedPlace.DisplayName.Text, &detailedPlace.Location.Longitude, &detailedPlace.Location.Latitude)
+		var photoStringFromDB string
+		location_query := fmt.Sprintf("SELECT name, address, longitude, latitude, photoURLs FROM PlaceDetails WHERE placeID = '%s'", place.ID)
+		log.Println(location_query)
+		backend.ReadRowFromDB(location_query).Scan(
+			&detailedPlace.DisplayName.Text,
+			&detailedPlace.Address,
+			&detailedPlace.Location.Longitude,
+			&detailedPlace.Location.Latitude,
+			&photoStringFromDB,
+		)
+		log.Println(detailedPlace.DisplayName.Text)
+		for _, photoURL := range strings.Split(photoStringFromDB, "$$") {
+			detailedPlace.Photos = append(detailedPlace.Photos, model.Photo{Id: photoURL})
+		}
 		detailedPlaces = append(detailedPlaces, detailedPlace)
 	}
+
 	return detailedPlaces, nil
 }
