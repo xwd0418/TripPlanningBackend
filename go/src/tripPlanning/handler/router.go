@@ -44,6 +44,9 @@ func InitRouter() http.Handler {
 
 	// modify routing
 	router.Handle("/modifyTrip/{tripID}", http.HandlerFunc(modifyTripHandler)).Methods("POST")
+
+	// generate/save plan with visit order exactly as user requested
+	router.Handle("/generateExactTrip", http.HandlerFunc(generateExactTripHandler)).Methods("POST")
 	fmt.Println("ready to receive requests")
 
 	// when fisrt sign in and sign up, no token authentication
