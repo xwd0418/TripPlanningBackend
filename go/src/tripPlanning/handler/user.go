@@ -19,9 +19,6 @@ var mySigningKey = []byte("secret")
 func loginHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received one signin request")
 	w.Header().Set("Content-Type", "text/plain")
-	// w.Header().Set("Content-Type", "application/json")
-	// Set sets the header entries associated with key to the single element value.
-	// It replaces any existing values associated with key.
 
 	//  Get User information from client
 	// process request -> user
@@ -35,7 +32,8 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if user exists,
-	success, err := service.CheckUser(user.Username, user.Password)
+
+	success, err := service.CheckUser(user.Username, user.Password,false)
 	// if yes, return true, otherwise false,
 	// if there is error message, something else is wrong
 	if err != nil {
@@ -50,7 +48,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 2.1 if sing in successfully first time, generate token for future use
+	// 2.1 if log in successfully first time, generate token for future use
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"username": user.Username,
 		"id": user.Id,
@@ -105,18 +103,13 @@ func signupHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Printf("Invalid username or password\n")
 		return
 	}
-
-	success, err := service.AddUser(&user)
+	
+	err := service.RegisterUser(user)
 	if err != nil {
-		http.Error(w, "Failed to save user to Database", http.StatusInternalServerError)
-		fmt.Printf("Failed to save user to Database %v\n", err)
+		http.Error(w, "Failed to register user", http.StatusInternalServerError)
+		fmt.Printf("Failed to register user %v\n", err)
 		return
 	}
 
-	if !success { // if alreayd exist, AddUser will return false but err will be nil
-		http.Error(w, "User already exists", http.StatusBadRequest)
-		fmt.Println("User already exists")
-		return
-	}
 	fmt.Printf("User added successfully: %s.\n", user.Username)
 }

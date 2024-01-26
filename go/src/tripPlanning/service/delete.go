@@ -74,6 +74,7 @@ func DeleteDayPlansForTrip(tripID string) error {
 	return nil
 }
 
+
 func DeleteDayPlanWithAssociations(dayPlanID string) error {
 	// Check if the day plan exists
 	exists, err := backend.CheckIfItemExistsInDB("dayplans", "dayplanid", dayPlanID)
