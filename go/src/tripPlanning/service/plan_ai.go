@@ -30,14 +30,14 @@ func NewTravelPlannerService(openAIKey string) *TravelPlannerService {
 }
 
 // AiGeneratedPlan generates a plan using ChatGPT API
-func (s *TravelPlannerService) AiGeneratedPlan(city, startDay, endDay string) (string, error) {
+func (s *TravelPlannerService) AiGeneratedPlan(city, startDay, endDay, user_preference string) (string, error) {
 	// Set up OpenAI API client
 	apiEndpoint := constants.OpenaiEndpoint
 
 	fmt.Println("successful connect to gpt")
 
 	// Construct the input prompt for ChatGPT
-	promptMessage := fmt.Sprintf("Give me a trip plan to travel to %s from %s to %s with the most famous places of interest. Start with \"Here is AI-generated trip advising:\"", city, startDay, endDay)
+	promptMessage := fmt.Sprintf("Give me a trip plan to travel to %s from %s to %s with a specification that \"%s\", Start with \"Here is AI-generated trip advising:\"", city, startDay, endDay, user_preference)
 
 	// Construct the request payload
 	requestPayload := map[string]interface{}{
@@ -97,6 +97,6 @@ func (s *TravelPlannerService) AiGeneratedPlan(city, startDay, endDay string) (s
 		// Return the content of the first choice
 		return response.Choices[0].Message.Content, nil
 	} else {
-		return "", fmt.Errorf("no content found in response, length of response.choices is %d", len(response.Choices))
+		return "", fmt.Errorf("no content found in response")
 	}
 }

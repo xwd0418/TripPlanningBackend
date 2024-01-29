@@ -14,9 +14,10 @@ import (
 func AiGeneratedPlanHandler(w http.ResponseWriter, r *http.Request) {
 	// Assuming the frontend sends a JSON payload with city and startDay and EndDay
 	var request struct {
-		City     string `json:"City"`
-		StartDay string `json:"StartDay"`
-		EndDay   string `json:"EndDay"`
+		City              string `json:"City"`
+		StartDay          string `json:"StartDay"`
+		EndDay            string `json:"EndDay"`
+		UserSpecification string `json:"UserSpecification"`
 	}
 
 	// Decode the JSON payload from the request body
@@ -35,7 +36,7 @@ func AiGeneratedPlanHandler(w http.ResponseWriter, r *http.Request) {
 	// Create an instance of TravelPlannerService
 	travelPlanner := service.NewTravelPlannerService(constants.Openai_key)
 	// Call the AiGeneratedPlan method on the TravelPlannerService instance
-	plan, err := travelPlanner.AiGeneratedPlan(request.City, request.StartDay, request.EndDay)
+	plan, err := travelPlanner.AiGeneratedPlan(request.City, request.StartDay, request.EndDay, request.UserSpecification)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Error generating plan: %v", err), http.StatusInternalServerError)
 		return
