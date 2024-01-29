@@ -4,15 +4,28 @@ import (
 	"fmt"
 	"log"
 	"tripPlanning/backend"
-	"github.com/pborman/uuid"
 	"tripPlanning/model"
 
+	"github.com/pborman/uuid"
 )
 
-//for the placesOfAllDays, we expect the place in the exact order as the user modifies
-func ModifyTrip(userID string, tripID string, placesOfAllDays [][]model.Place, startDay string, endDay string, transportation string, tripName string) (string, error) {
+// for the placesOfAllDays, we expect the place in the exact order as the user modifies
+func ModifyTrip(username string, tripID string, placesOfAllDays [][]model.Place, startDay string, endDay string, transportation string, tripName string) (string, error) {
+	// find userID
+	log.Println("func input username is", username)
+	user, err := backend.GetUser(username)
+	log.Println("user is", user.Username, user.Id)
+	if err != nil {
+		log.Println("Error during finding user based on username in the database:", err)
+		return "", err
+	}
+
 	// Check if the trip exists
-	exists, err := backend.CheckIfItemExistsInDB(backend.TableName_Trips, "tripID", tripID)
+	exists_query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = '%s')", backend.TableName_Trips, "tripID", tripID)
+	var exists bool
+	// log.Println(exists_query)
+	backend.ReadRowFromDB(exists_query).Scan(&exists)
+	// exists, err := backend.CheckIfItemExistsInDB(backend.TableName_Trips, "tripID", "'"+tripID+"'")
 	if err != nil {
 		log.Println("Error checking if the trip ID exists in the database:", err)
 		return "", err
@@ -20,7 +33,7 @@ func ModifyTrip(userID string, tripID string, placesOfAllDays [][]model.Place, s
 
 	if !exists {
 		// Return an error or handle the case where the trip doesn't exist
-		return "", fmt.Errorf("Trip with ID %s does not exist", tripID)
+		return "", fmt.Errorf("trip with ID %s does not exist", tripID)
 	}
 
 	// Delete the original trip
@@ -31,8 +44,9 @@ func ModifyTrip(userID string, tripID string, placesOfAllDays [][]model.Place, s
 	}
 
 	// Generate a new trip with the provided parameters
-	// with the place visit order exactly as passed in 
-	newTripID, err := GenerateExactTrip(userID, placesOfAllDays, startDay, endDay, transportation, tripName)
+	// with the place visit order exactly as passed in
+
+	newTripID, err := GenerateExactTrip(user.Id, placesOfAllDays, startDay, endDay, transportation, tripName)
 	if err != nil {
 		log.Println("Error generating a new trip:", err)
 		return "", err
@@ -41,26 +55,28 @@ func ModifyTrip(userID string, tripID string, placesOfAllDays [][]model.Place, s
 	return newTripID, nil
 }
 
-//regenerate a trip with the day order and place visit order
-//exactly as the user modifies at the frontend through [][]model.Place
+// regenerate a trip with the day order and place visit order
+// exactly as the user modifies at the frontend through [][]model.Place
 func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay string, endDay string, transportation string, tripName string) (string, error) {
 
 	// 1. create a new TripPlan for this user
 	tripID := uuid.New()
+	sampleplacename := placesOfAllDays[0][0].DisplayName.Text
 	tripTableEntry := map[string]interface{}{
-		"tripID":         tripID,
-		"userID":         userID,
-		"tripName":       tripName,
-		"startDay":       startDay,
-		"endDay":         endDay,
-		"transportation": transportation,
+		"tripID":          tripID,
+		"userID":          userID,
+		"tripName":        tripName,
+		"startDay":        startDay,
+		"endDay":          endDay,
+		"transportation":  transportation,
+		"sampleplacename": sampleplacename,
 	}
 	err := backend.InsertIntoDB(backend.TableName_Trips, tripTableEntry)
 	if err != nil {
 		log.Println("Error during store new trip plan: ", err)
 		return "", err
 	}
-	
+
 	// 2. get routes for each day
 	var plannedRoutes [][]model.Place
 
@@ -83,10 +99,10 @@ func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay 
 			log.Println("Error during store new day-plan: ", err)
 			return "", err
 		}
-	
+
 		// 3.2 save each place of the day
 		for visitOrder, place := range plannedRoute {
-		
+
 			placeID := place.Id
 			placeIsInDB, err := backend.CheckIfItemExistsInDB(backend.TableName_PlaceDetails, "placeID", placeID)
 			if err != nil {
@@ -100,7 +116,7 @@ func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay 
 					return "", err
 				}
 			}
-	
+
 			// 3.2.2 save the day-place relation
 			dayPlaceRelationEntry := map[string]interface{}{
 				"placeID":    placeID,
@@ -116,4 +132,3 @@ func GenerateExactTrip(userID string, placesOfAllDays [][]model.Place, startDay 
 	}
 	return tripID, nil
 }
-

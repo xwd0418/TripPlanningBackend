@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
-	"strings"
 	"tripPlanning/model"
 	"tripPlanning/service"
 )
@@ -19,13 +18,13 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Extracting the tripID from the URL path
-	urlTripID := strings.TrimPrefix(r.URL.Path, "/modifyTrip/")
-	if urlTripID == "" {
-		log.Println("Trip ID not provided in the URL")
-		http.Error(w, "Trip ID is required", http.StatusBadRequest)
-		return
-	}
+	// // Extracting the tripID from the URL path
+	// urlTripID := strings.TrimPrefix(r.URL.Path, "/modifyTrip/")
+	// if urlTripID == "" {
+	// 	log.Println("Trip ID not provided in the URL")
+	// 	http.Error(w, "Trip ID is required", http.StatusBadRequest)
+	// 	return
+	// }
 
 	//request body decoding
 	var tripPlan model.TripPlan
@@ -36,14 +35,16 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Decoded trip plan for modification: %v", tripPlan)
+	username := r.URL.Query().Get("username")
 
-	//consistency check between URL tripID and tripID provided in the request body
-	if urlTripID != tripPlan.TripPlanId {
-		log.Println("Inconsistent trip IDs provided")
-		http.Error(w, "Inconsistent trip IDs", http.StatusBadRequest)
-		return
-	}
+	// log.Printf("Decoded trip plan for modification: %v", tripPlan)
+
+	// //consistency check between URL tripID and tripID provided in the request body
+	// if urlTripID != tripPlan.TripPlanId {
+	// 	log.Println("Inconsistent trip IDs provided")
+	// 	http.Error(w, "Inconsistent trip IDs", http.StatusBadRequest)
+	// 	return
+	// }
 
 	// Extracting placesOfAllDays from DayPlans
 	placesOfAllDays := tripPlan.Places
@@ -51,7 +52,7 @@ func modifyTripHandler(w http.ResponseWriter, r *http.Request) {
 	// 	placesOfAllDays = append(placesOfAllDays, dayPlan.PlacesToVisit)
 	// }
 
-	newTripID, err := service.ModifyTrip(tripPlan.UserID, urlTripID, placesOfAllDays, tripPlan.StartDay, tripPlan.EndDay, tripPlan.Transportation, tripPlan.TripName)
+	newTripID, err := service.ModifyTrip(username, tripPlan.TripPlanId, placesOfAllDays, tripPlan.StartDay, tripPlan.EndDay, tripPlan.Transportation, tripPlan.TripName)
 	if err != nil {
 		log.Printf("Error modifying trip: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)

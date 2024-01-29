@@ -26,7 +26,7 @@ type byID []idWithOder
 
 func (a byID) Len() int           { return len(a) }
 func (a byID) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a byID) Less(i, j int) bool { return a[i].ID < a[j].ID }
+func (a byID) Less(i, j int) bool { return a[i].order < a[j].order }
 
 func ReadUserGeneralTripPlans(username string) ([]model.TripPlan, error) {
 	user, err := backend.GetUser(username)
@@ -43,11 +43,15 @@ func ReadUserGeneralTripPlans(username string) ([]model.TripPlan, error) {
 	}
 	defer rows.Close()
 	var tripPlans []model.TripPlan
+	// log.Println("see how trip general info:")
 	for rows.Next() {
 		var p model.TripPlan
+
 		if err := rows.Scan(&p.TripPlanId, &p.TripName, &p.StartDay, &p.EndDay, &p.Transportation, &p.SamplePlaceName); err != nil {
+			log.Println("problem trip id is ", p.TripPlanId)
 			return nil, err
 		}
+		log.Println(p.TripName)
 		tripPlans = append(tripPlans, p)
 	}
 
@@ -80,7 +84,9 @@ func ReadAllDayPlansOfTripPlan(tripID string) (model.TripPlan, error) {
 		}
 		dayIDsWithOrder = append(dayIDsWithOrder, day_datum)
 	}
+	// log.Println("before sorting, day id is", dayIDsWithOrder[0].order, dayIDsWithOrder[1].order, dayIDsWithOrder[2].order)
 	sort.Sort(byID(dayIDsWithOrder))
+	// log.Println("after sorting, day id is", dayIDsWithOrder[0].order, dayIDsWithOrder[1].order, dayIDsWithOrder[2].order)
 
 	// construct dayplan for each day
 	current_date, err := time.Parse(date_format_layout, detailedTripPlan.StartDay)
@@ -139,7 +145,7 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 		detailedPlace.Id = place.ID
 		var photoStringFromDB string
 		location_query := fmt.Sprintf("SELECT name, address, longitude, latitude, photoURLs FROM PlaceDetails WHERE placeID = '%s'", place.ID)
-		log.Println(location_query)
+		// log.Println(location_query)
 		backend.ReadRowFromDB(location_query).Scan(
 			&detailedPlace.DisplayName.Text,
 			&detailedPlace.Address,
@@ -147,7 +153,7 @@ func getPlacesOfDay(dayID string) ([]model.Place, error) {
 			&detailedPlace.Location.Latitude,
 			&photoStringFromDB,
 		)
-		log.Println(detailedPlace.DisplayName.Text)
+		// log.Println(detailedPlace.DisplayName.Text)
 		for _, photoURL := range strings.Split(photoStringFromDB, "$$") {
 			detailedPlace.Photos = append(detailedPlace.Photos, model.Photo{Id: photoURL})
 		}

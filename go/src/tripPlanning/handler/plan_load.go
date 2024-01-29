@@ -20,6 +20,7 @@ func readUserGeneralTripsHandler(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Failed to get tripPlans, error: %v", err)
 		return
 	}
+	// log.Println(len(tripPlans))
 
 	// 3. construct response  : post => json
 	js, err := json.Marshal(tripPlans)

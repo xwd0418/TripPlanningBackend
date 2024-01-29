@@ -4,15 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"tripPlanning/service"
-
-	"github.com/gorilla/mux"
 )
 
 func DeleteTripHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Received one 'delete trip' request")
 
-	params := mux.Vars(r)
-	tripID := params["tripID"]
+	tripID := r.URL.Query().Get("tripID")
 
 	err := service.DeleteTripWithAssociations(tripID)
 	if err != nil {

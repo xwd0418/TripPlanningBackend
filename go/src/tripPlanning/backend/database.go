@@ -123,23 +123,18 @@ func ReadFromDB(tableName string, columns_to_read []string, conditions string) (
 	return rows, nil
 }
 
-
 func ReadFromDB_user(tableName string, columnsToRead []string, conditions string, values ...interface{}) (*sql.Rows, error) {
-    queryStatement := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columnsToRead, ", "), tableName)
-    if conditions != "" {
-        queryStatement += " WHERE " + conditions
-    }
-    rows, err := db.Query(queryStatement, values...)
-    if err != nil {
-        log.Println("Query "+queryStatement+" fails: ", err)
-        return nil, err
-    }
-    return rows, nil
+	queryStatement := fmt.Sprintf("SELECT %s FROM %s", strings.Join(columnsToRead, ", "), tableName)
+	if conditions != "" {
+		queryStatement += " WHERE " + conditions
+	}
+	rows, err := db.Query(queryStatement, values...)
+	if err != nil {
+		log.Println("Query "+queryStatement+" fails: ", err)
+		return nil, err
+	}
+	return rows, nil
 }
-
-
-
-
 
 func QueryRowsFromDB(queryStatement string) (*sql.Rows, error) {
 	rows, err := db.Query(queryStatement)
@@ -155,6 +150,7 @@ func CheckIfItemExistsInDB(tableName string, columnName string, itemValue interf
 	var exists bool
 	query := fmt.Sprintf("SELECT EXISTS(SELECT 1 FROM %s WHERE %s = $1)", tableName, columnName)
 	// log.Printf("check duplicated place query is %s", query)
+	// log.Println(itemValue)
 	err := db.QueryRow(query, itemValue).Scan(&exists)
 	if err != nil {
 		log.Printf("error of query row during checking duplicated places %v", err)
@@ -269,6 +265,7 @@ func GetUser(username string) (*model.User, error) {
 		}
 		return nil, fmt.Errorf("error querying user: %w", err)
 	}
+	log.Println("inside getting user function, user is", user.Username, user.Id)
 	return &user, nil
 }
 

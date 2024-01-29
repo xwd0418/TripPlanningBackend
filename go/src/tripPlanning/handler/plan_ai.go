@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"tripPlanning/service"
+
 	//"tripPlanning/model"
-	"tripPlanning/constants"
 	"fmt"
+	"tripPlanning/constants"
 )
 
 // AiGeneratedPlanHandler handles requests for AI-generated travel plans
 func AiGeneratedPlanHandler(w http.ResponseWriter, r *http.Request) {
 	// Assuming the frontend sends a JSON payload with city and startDay and EndDay
 	var request struct {
-		City 		   string 	 `json:"City"`
-		StartDay       string    `json:"StartDay"`
-		EndDay         string    `json:"EndDay"`
+		City     string `json:"City"`
+		StartDay string `json:"StartDay"`
+		EndDay   string `json:"EndDay"`
 	}
 
 	// Decode the JSON payload from the request body
@@ -26,7 +27,7 @@ func AiGeneratedPlanHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Validate the received data
-	if request.City == "" || request.StartDay  == "" || request.EndDay == ""{
+	if request.City == "" || request.StartDay == "" || request.EndDay == "" {
 		http.Error(w, "City and date are required", http.StatusBadRequest)
 		return
 	}
@@ -44,4 +45,3 @@ func AiGeneratedPlanHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(plan)
 }
-

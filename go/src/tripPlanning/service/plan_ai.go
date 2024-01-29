@@ -97,6 +97,6 @@ func (s *TravelPlannerService) AiGeneratedPlan(city, startDay, endDay string) (s
 		// Return the content of the first choice
 		return response.Choices[0].Message.Content, nil
 	} else {
-		return "", fmt.Errorf("no content found in response")
+		return "", fmt.Errorf("no content found in response, length of response.choices is %d", len(response.Choices))
 	}
 }
