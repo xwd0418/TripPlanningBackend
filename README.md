@@ -23,17 +23,17 @@ go mod tidy
 Start the server with `go run main.go`
 
 ### APIs Overview
-## User APIs
+#### User APIs
 Signup: POST /signup - Register a new user.
 Login: POST /login - Authenticate a user.
-## Place APIs
+#### Place APIs
 Show Places: GET /showDefaultPlaces?max_num_display=<number> - Get default places.
 Search Places: GET /searchPlaces - Search for places.
-## Trip Planning
+#### Trip Planning
 Generate Trip: POST /generateTripPlan - Create a new trip plan.
 Modify Trip: POST /modifyTrip/{tripID} - Update an existing trip.
 Delete Trip: DELETE /deleteTrip/{tripID} - Remove a trip.
-## Trip Advising
+#### Trip Advising
 Generate Trip Advice: GET /recommendation - Use ChatGPT to provide advice to users 
 
 
